@@ -1,5 +1,11 @@
 # Patches (alpha)
 
+### v0.0.1-alpha.3
+
+- fixed type parsing
+- fixed multi-character token tokenization problem
+- updated error messages
+
 ### v0.0.1-alpha.2
 
 - added anonymous functions (frontend).

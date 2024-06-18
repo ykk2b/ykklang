@@ -24,18 +24,18 @@ impl Parser {
         id
     }
     pub fn parse(&mut self) -> Result<Vec<Statement>, String> {
-        let mut stmts = vec![];
+        let mut statements = vec![];
         while !self.is_at_end() {
-            let stmt = self.declaration();
-            match stmt {
-                Ok(s) => stmts.push(s),
+            let statement = self.declaration();
+            match statement {
+                Ok(s) => statements.push(s),
                 Err(_) => {
                     eprintln!("failed to parse a statement.");
                     exit(1);
                 }
             }
         }
-        Ok(stmts)
+        Ok(statements)
     }
     fn declaration(&mut self) -> Result<Statement, String> {
         if self.match_token(Let) {
@@ -118,10 +118,18 @@ impl Parser {
     fn var_declaration(&mut self) -> Result<Statement, String> {
         let name = self.consume(Identifier, "expected a variable name");
         self.consume(Colon, "expected ':' after a variable name");
-        let value_type = if self.match_tokens(&[Identifier, StringValue, NumberValue]) {
+        let value_type = if self.match_tokens(&[
+            StringValue,
+            NumberValue,
+            VoidValue,
+            NullValue,
+            BooleanValue,
+            TrueValue,
+            FalseValue,
+        ]) {
             self.previous(1)
         } else {
-            eprintln!("expected type after ':'");
+            eprintln!("expected type after ':' at line {}", name.line_number);
             exit(1);
         };
         self.consume(Equal, "expected '=' after a variable name");
@@ -141,11 +149,27 @@ impl Parser {
 
         if !self.check(RightParen) {
             if parameters.len() >= 32 {
-                eprintln!("function can't have more then 32 parameters");
+                eprintln!(
+                    "function can't have more then 32 parameters, at line {}",
+                    name.line_number
+                );
                 exit(1);
             }
             loop {
-                let paramater_type = self.consume(Identifier, "expected parameter type");
+                let paramater_type = if self.match_tokens(&[
+                    StringValue,
+                    NumberValue,
+                    VoidValue,
+                    NullValue,
+                    BooleanValue,
+                    TrueValue,
+                    FalseValue,
+                ]) {
+                    self.previous(1)
+                } else {
+                    eprintln!("expected parameter type at line {}", name.line_number);
+                    exit(1);
+                };
 
                 let paramater_name = self.consume(Identifier, "expected parameter name");
 
@@ -158,8 +182,20 @@ impl Parser {
 
         self.consume(RightParen, "expected ')' after parameters");
         self.consume(Arrow, "expected '->' after parameters");
-        let value_type = self.consume(Identifier, "expected type after '->'");
-        println!("{:?}", value_type);
+        let value_type = if self.match_tokens(&[
+            StringValue,
+            NumberValue,
+            VoidValue,
+            NullValue,
+            BooleanValue,
+            TrueValue,
+            FalseValue,
+        ]) {
+            self.previous(1)
+        } else {
+            eprintln!("expected type after '->' at line {}", name.line_number);
+            exit(1);
+        };
         self.consume(LeftBrace, "expected '{' before function body");
 
         let body = match self
@@ -168,7 +204,10 @@ impl Parser {
         {
             Statement::BlockStatement { statements } => statements,
             _ => {
-                eprintln!("failed to parse a block statement");
+                eprintln!(
+                    "failed to parse a block statement at line {}",
+                    name.line_number
+                );
                 exit(1);
             }
         };
@@ -372,7 +411,10 @@ impl Parser {
 
                     if !self.check(RightParen) {
                         if parameters.len() >= 32 {
-                            eprintln!("function can't have more then 32 parameters");
+                            eprintln!(
+                                "function can't have more then 32 parameters, at line {}",
+                                self.previous(1).line_number
+                            );
                             exit(1);
                         }
                         loop {
@@ -399,7 +441,10 @@ impl Parser {
                     {
                         Statement::BlockStatement { statements } => statements,
                         _ => {
-                            eprintln!("failed to parse a block statement");
+                            eprintln!(
+                                "failed to parse a block statement at line {}",
+                                value_type.line_number
+                            );
                             exit(1);
                         }
                     };
@@ -435,7 +480,7 @@ impl Parser {
                 return self.parse_map();
             }
             _ => {
-                eprintln!("unexpected token");
+                eprintln!("unexpected token at line {}", token.line_number);
                 exit(1);
             }
         }
@@ -480,7 +525,10 @@ impl Parser {
                 let arg = self.expression().expect("failed to parse an expression");
                 arguments.push(arg);
                 if arguments.len() >= 32 {
-                    eprintln!("function can't have more then 32 arguments");
+                    eprintln!(
+                        "function can't have more then 32 arguments, at line {}",
+                        self.previous(1).line_number
+                    );
                 } else if !self.match_token(Comma) {
                     break;
                 }
@@ -501,8 +549,10 @@ impl Parser {
             let token = self.previous(1);
             return Ok::<Unit, String>(token).expect("failed to consume a character");
         }
-        eprintln!("{}", msg);
-        Ok::<Unit, String>(unit).expect("failed to consume a character")
+
+        eprintln!("{}, at line {}", msg, unit.line_number);
+        Ok::<Unit, String>(unit.clone())
+            .expect(format!("failed to consume a character at line {}", unit.line_number).as_str())
     }
 
     fn check(&mut self, token: Token) -> bool {

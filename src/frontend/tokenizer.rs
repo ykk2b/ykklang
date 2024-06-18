@@ -42,37 +42,54 @@ impl Tokenizer {
     fn collect_tokens(&mut self) -> Result<(), String> {
         let character = self.advance();
         match character {
-            ':' => self.push_unit(if self.clone().match_char('=') {
-                ColonEqual
-            } else {
-                Colon
-            }),
+            ':' => {
+                if self.match_char('=') {
+                    self.push_unit(ColonEqual)
+                } else {
+                    self.push_unit(Colon)
+                }
+            }
             ',' => self.push_unit(Comma),
             '.' => self.push_unit(Dot),
             '+' => self.push_unit(Plus),
-            '-' => self.push_unit(if self.clone().match_char('>') {
-                Arrow
-            } else {
-                Minus
-            }),
+            '-' => {
+                if self.match_char('>') {
+                    self.push_unit(Arrow)
+                } else {
+                    self.push_unit(Minus)
+                }
+            }
             '*' => self.push_unit(Asteric),
             '/' => self.push_unit(Slash),
             '%' => self.push_unit(Percent),
-            '=' => self.push_unit(if self.clone().match_char('=') {
-                EqualEqual
-            } else {
-                Equal
-            }),
-            '>' => self.push_unit(if self.clone().match_char('=') {
-                MoreEqual
-            } else {
-                More
-            }),
-            '<' => self.push_unit(if self.clone().match_char('=') {
-                LessEqual
-            } else {
-                Less
-            }),
+            '=' => {
+                if self.match_char('=') {
+                    self.push_unit(EqualEqual)
+                } else {
+                    self.push_unit(Equal)
+                }
+            }
+            '>' => {
+                if self.match_char('=') {
+                    self.push_unit(MoreEqual)
+                } else {
+                    self.push_unit(More)
+                }
+            }
+            '<' => {
+                if self.match_char('=') {
+                    self.push_unit(LessEqual)
+                } else {
+                    self.push_unit(Less)
+                }
+            }
+            '!' => {
+                if self.match_char('=') {
+                    self.push_unit(BangEqual)
+                } else {
+                    self.push_unit(Bang)
+                }
+            }
             '&' => self.push_unit(And),
             '|' => self.push_unit(Pipe),
             '#' => self.push_unit(Hash),
@@ -85,24 +102,18 @@ impl Tokenizer {
             '[' => self.push_unit(LeftBracket),
             ']' => self.push_unit(RightBracket),
             ';' => self.push_unit(Semicolon),
-            '!' => self.push_unit(if self.clone().match_char('=') {
-                BangEqual
-            } else {
-                Bang
-            }),
-            '"' => self.parse_string()?,
+            '"' => self.parse_string(),
             ' ' | '\r' | '\t' => {}
             '\n' => {
                 self.line += 1;
             }
-            '\'' => self.parse_string()?,
             _ => {
                 if character.is_digit(10) {
                     self.parse_number().expect("failed to parse a number.");
                 } else if character.is_alphabetic() || character == '_' {
                     self.parse_identifier();
                 } else {
-                    eprintln!("unexpected character: {}", character);
+                    eprintln!("unexpected character (line {}): {}", self.line, character);
                 }
             }
         }
@@ -153,7 +164,7 @@ impl Tokenizer {
         }
     }
 
-    fn parse_string(&mut self) -> Result<(), String> {
+    fn parse_string(&mut self) -> () {
         while self.peek() != '"' && !self.is_at_end() {
             if self.peek() == '\n' {
                 self.line += 1;
@@ -169,7 +180,7 @@ impl Tokenizer {
         self.advance();
         let value = &self.input[self.start + 1..self.current - 1];
         self.push_token_value(StringValue, Some(Value::String(value.to_string())));
-        Ok(())
+        Ok::<(), String>(()).expect("failed to parse a string");
     }
 
     fn parse_number(&mut self) -> Result<(), String> {
