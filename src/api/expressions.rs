@@ -6,10 +6,9 @@ pub enum Expression {
         id: usize,
         items: Vec<Box<Expression>>,
     },
-    AssignExpression {
+    MapExpression {
         id: usize,
-        name: Unit,
-        value: Box<Expression>,
+        items: Vec<(String, Box<Expression>)>,
     },
     VariableExpression {
         id: usize,

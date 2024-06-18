@@ -1,3 +1,3 @@
 # YKKLang
 
-A minimalistic programming language. Nothing important, just another interpreted programming language written in Rust. Building for educational purposes and nothing more.
+A minimalistic functional programming language. Just for the educational and entertaitment purposes.

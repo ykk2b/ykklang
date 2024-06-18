@@ -50,7 +50,11 @@ impl Tokenizer {
             ',' => self.push_unit(Comma),
             '.' => self.push_unit(Dot),
             '+' => self.push_unit(Plus),
-            '-' => self.push_unit(Minus),
+            '-' => self.push_unit(if self.clone().match_char('>') {
+                Arrow
+            } else {
+                Minus
+            }),
             '*' => self.push_unit(Asteric),
             '/' => self.push_unit(Slash),
             '%' => self.push_unit(Percent),

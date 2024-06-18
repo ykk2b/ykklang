@@ -31,6 +31,7 @@ pub enum Token {
     EqualEqual,
     MoreEqual,
     LessEqual,
+    Arrow,
     // ExactEqual,
     // ...
     Let,
@@ -38,11 +39,9 @@ pub enum Token {
     If,
     ElseIf,
     Else,
-    While,
     From,
     Return,
-    Mod,
-    Break,
+    Module,
     EoF,
     // ...
     NumberValue,
@@ -82,11 +81,9 @@ pub fn keywords() -> HashMap<&'static str, Token> {
         ("if", Token::If),
         ("else if", Token::Else),
         ("else", Token::Else),
-        ("while", Token::While),
         ("from", Token::From),
         ("return", Token::Return),
-        ("break", Token::Break),
-        ("mod", Token::Mod),
+        ("module", Token::Module),
         // ...
         ("boolean", Token::BooleanValue),
         ("true", Token::TrueValue),

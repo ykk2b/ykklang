@@ -28,12 +28,7 @@ pub enum Statement {
         else_if_branches: Vec<(Vec<Expression>, Box<Statement>)>,
         else_branch: Option<Box<Statement>>,
     },
-    WhileStatement {
-        condition: Expression,
-        body: Box<Statement>,
-    },
-    BreakStatement {},
-    ModStatement {
+    ModuleStatement {
         name: Unit,
         from: Unit,
     },

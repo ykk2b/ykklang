@@ -25,8 +25,7 @@ pub struct FunctionValueType {
 pub enum ValueType {
     NumberValueType(f32),
     StringValueType(String),
-    ArrayValueType(Vec<ValueType>),
-    TuppleValueType(Vec<ValueType>),
+    MapValueType(Vec<ValueType>),
     FunctionValueType(FunctionValueType),
     BooleanValueType(bool),
     TrueValueType,
