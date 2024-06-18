@@ -1,18 +1,20 @@
 mod api;
 mod backend;
 mod frontend;
+use std::process::exit;
+
 use frontend::frontend;
 use utils::cli::CLI;
 mod utils;
 
 fn main() {
     let cli = CLI::new();
-    let run = CLI::run(&cli);
-
-    if run.is_some() {
-        println!("running: {}", run.expect("failed to parse a 'run' command"))
-    }
-
-    frontend("let x: number = 10;");
-    println!("Hello, world!");
+    let input = match CLI::input(&cli) {
+        Ok(content) => content,
+        Err(e) => {
+            eprintln!("Failed to read file: {}", e);
+            exit(1);
+        }
+    };
+    frontend(&input);
 }

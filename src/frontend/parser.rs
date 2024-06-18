@@ -60,16 +60,10 @@ impl Parser {
         }
     }
     fn module_statement(&mut self) -> Result<Statement, String> {
-        let name = self
-            .consume(Identifier, "expected module name")
-            .expect("failed to consume a character");
-        self.consume(From, "expected 'from' after the module name")
-            .expect("failed to consume a character");
-        let from = self
-            .consume(StringValue, "expected module destination")
-            .expect("failed to consume a character");
-        self.consume(Semicolon, "expected ';' after value")
-            .expect("failed to consume a character");
+        let name = self.consume(Identifier, "expected module name");
+        self.consume(From, "expected 'from' after the module name");
+        let from = self.consume(StringValue, "expected module destination");
+        self.consume(Semicolon, "expected ';' after value");
         Ok(Statement::ModuleStatement { name, from })
     }
     fn return_statement(&mut self) -> Result<Statement, String> {
@@ -80,8 +74,7 @@ impl Parser {
         } else {
             value = None;
         }
-        self.consume(Semicolon, "Expected ';' after return value;")
-            .expect("failed to consume a character");
+        self.consume(Semicolon, "Expected ';' after return value;");
         Ok(Statement::ReturnStatement { value })
     }
     fn if_statement(&mut self) -> Result<Statement, String> {
@@ -118,28 +111,22 @@ impl Parser {
 
     fn expression_statement(&mut self) -> Result<Statement, String> {
         let expression = self.expression().expect("failed to parse an expression");
-        self.consume(Semicolon, "expected ';' after expression")
-            .expect("failed to consume a character");
+        self.consume(Semicolon, "expected ';' after expression");
         Ok(Statement::ExpressionStatement { expression })
     }
 
     fn var_declaration(&mut self) -> Result<Statement, String> {
-        let name = self
-            .consume(Identifier, "expected a variable name")
-            .expect("failed to consume a character");
-        self.consume(Colon, "expected ':' after a variable name")
-            .expect("failed to consume a character");
+        let name = self.consume(Identifier, "expected a variable name");
+        self.consume(Colon, "expected ':' after a variable name");
         let value_type = if self.match_tokens(&[Identifier, StringValue, NumberValue]) {
             self.previous(1)
         } else {
             eprintln!("expected type after ':'");
             exit(1);
         };
-        self.consume(Equal, "expected '=' after a variable name")
-            .expect("failed to consume a character");
+        self.consume(Equal, "expected '=' after a variable name");
         let value = self.expression().expect("failed to parse an expression");
-        self.consume(Semicolon, "expected ';' after variable declaration")
-            .expect("failed to consume a character");
+        self.consume(Semicolon, "expected ';' after variable declaration");
         Ok(Statement::VariableStatement {
             name,
             value_type,
@@ -148,11 +135,8 @@ impl Parser {
     }
 
     fn function_declaration(&mut self) -> Result<Statement, String> {
-        let name = self
-            .consume(Identifier, "expected function name")
-            .expect("failed to consume a character");
-        self.consume(LeftParen, "expected '(' after a function name")
-            .expect("failed to consume a character");
+        let name = self.consume(Identifier, "expected function name");
+        self.consume(LeftParen, "expected '(' after a function name");
         let mut parameters: Vec<(Unit, Unit)> = vec![];
 
         if !self.check(RightParen) {
@@ -161,13 +145,9 @@ impl Parser {
                 exit(1);
             }
             loop {
-                let paramater_type = self
-                    .consume(Identifier, "expected parameter type")
-                    .expect("failed to consume a character");
+                let paramater_type = self.consume(Identifier, "expected parameter type");
 
-                let paramater_name = self
-                    .consume(Identifier, "expected parameter name")
-                    .expect("failed to consume a character");
+                let paramater_name = self.consume(Identifier, "expected parameter name");
 
                 parameters.push((paramater_name, paramater_type));
                 if !self.match_token(Comma) {
@@ -176,15 +156,11 @@ impl Parser {
             }
         }
 
-        self.consume(RightParen, "expected ')' after parameters")
-            .expect("failed to consume a character");
-        self.consume(Arrow, "expected '->' after parameters")
-            .expect("failed to consume a character");
-        let value_type = self
-            .consume(Identifier, "expected type after '->'")
-            .expect("failed to consume a character");
-        self.consume(LeftBrace, "expected '{' before function body")
-            .expect("failed to consume a character");
+        self.consume(RightParen, "expected ')' after parameters");
+        self.consume(Arrow, "expected '->' after parameters");
+        let value_type = self.consume(Identifier, "expected type after '->'");
+        println!("{:?}", value_type);
+        self.consume(LeftBrace, "expected '{' before function body");
 
         let body = match self
             .block_statement()
@@ -210,8 +186,7 @@ impl Parser {
             let declaration = self.declaration().expect("failed to parse a declaration");
             statements.push(Box::new(declaration));
         }
-        self.consume(RightBrace, "expected '}' after a block")
-            .expect("failed to consume a character");
+        self.consume(RightBrace, "expected '}' after a block");
         Ok(Statement::BlockStatement { statements })
     }
 
@@ -367,36 +342,82 @@ impl Parser {
                 if self.match_token(LeftBracket) {
                     let mut items = Vec::new();
                     while self.check(RightBracket) && self.is_at_end() {
-                        let key = self.previous(1).lexeme.clone(); 
-                        
-                        self.consume(Colon, "expected ':' after key").expect("failed to consume a character");
+                        let key = self.previous(1).lexeme.clone();
+
+                        self.consume(Colon, "expected ':' after key");
                         let value = self.expression().expect("failed to parse a value");
-                
-                        if items.iter().any(|item: &(String, Box<Expression>)| item.0 == key) {
+
+                        if items
+                            .iter()
+                            .any(|item: &(String, Box<Expression>)| item.0 == key)
+                        {
                             eprintln!("key '{:?}' already exists in the map.", key);
                             exit(1);
                         }
-                       
+
                         items.push((key, Box::new(value)));
-                
+
                         if self.match_token(Comma) {
                             break;
                         }
                     }
-                    self.consume(RightBracket, "Expected ']' after map elements.").expect("failed to consume a character");
-                
+                    self.consume(RightBracket, "Expected ']' after map elements.");
+
                     expr = Expression::MapExpression {
                         id: self.get_id(),
                         items,
                     };
+                } else if self.match_token(LeftParen) {
+                    let mut parameters: Vec<(Unit, Unit)> = vec![];
+
+                    if !self.check(RightParen) {
+                        if parameters.len() >= 32 {
+                            eprintln!("function can't have more then 32 parameters");
+                            exit(1);
+                        }
+                        loop {
+                            let paramater_type =
+                                self.consume(Identifier, "expected parameter type");
+
+                            let paramater_name =
+                                self.consume(Identifier, "expected parameter name");
+
+                            parameters.push((paramater_name, paramater_type));
+                            if !self.match_token(Comma) {
+                                break;
+                            }
+                        }
+                    }
+                    self.consume(RightParen, "expected ')' after parameters");
+                    self.consume(Arrow, "expected '->' after parameters");
+                    let value_type = self.consume(Identifier, "expected type after '->'");
+                    self.consume(LeftBrace, "expected '{' before function body");
+
+                    let body = match self
+                        .block_statement()
+                        .expect("failed to parse a block statement")
+                    {
+                        Statement::BlockStatement { statements } => statements,
+                        _ => {
+                            eprintln!("failed to parse a block statement");
+                            exit(1);
+                        }
+                    };
+
+                    expr = Expression::AnonymousFunctionExpression {
+                        id: self.get_id(),
+                        parameters,
+                        value_type,
+                        body,
+                    }
                 }
+
                 result = expr;
             }
             LeftParen => {
                 self.advance();
                 let expr = self.expression().expect("failed to parse an expression");
-                self.consume(RightParen, "Expected ')' after expression")
-                    .expect("failed to consume a character");
+                self.consume(RightParen, "Expected ')' after expression");
                 result = Expression::GroupingExpression {
                     id: self.get_id(),
                     expression: Box::new(expr),
@@ -411,7 +432,7 @@ impl Parser {
                 };
             }
             LeftBracket => {
-                return self.parse_array();
+                return self.parse_map();
             }
             _ => {
                 eprintln!("unexpected token");
@@ -421,23 +442,33 @@ impl Parser {
         Ok(result)
     }
 
-    fn parse_array(&mut self) -> Result<Expression, String> {
+    fn parse_map(&mut self) -> Result<Expression, String> {
         let mut items = Vec::new();
-        let array_id = self.get_id();
         self.advance();
-        while !self.check(RightBracket) && !self.is_at_end() {
-            let item = self.expression().expect("failed to parse an expression");
-            items.push(Box::new(item));
+        while self.check(RightBracket) && self.is_at_end() {
+            let key = self.previous(1).lexeme.clone();
 
-            if !self.match_token(Comma) {
+            self.consume(Colon, "expected ':' after key");
+            let value = self.expression().expect("failed to parse a value");
+
+            if items
+                .iter()
+                .any(|item: &(String, Box<Expression>)| item.0 == key)
+            {
+                eprintln!("key '{:?}' already exists in the map.", key);
+                exit(1);
+            }
+
+            items.push((key, Box::new(value)));
+
+            if self.match_token(Comma) {
                 break;
             }
         }
-        self.consume(RightBracket, "Expect ']' after array elements.")
-            .expect("failed to consume a character");
+        self.consume(RightBracket, "Expect ']' after array elements.");
 
-        Ok(Expression::ArrayExpression {
-            id: array_id,
+        Ok(Expression::MapExpression {
+            id: self.get_id(),
             items,
         })
     }
@@ -455,8 +486,7 @@ impl Parser {
                 }
             }
         }
-        self.consume(RightParen, "expected ')' after arguments.")
-            .expect("failed to consume a character");
+        self.consume(RightParen, "expected ')' after arguments.");
         Ok(Expression::FunctionCallExpression {
             id: self.get_id(),
             name: Box::new(callee),
@@ -464,15 +494,15 @@ impl Parser {
         })
     }
 
-    fn consume(&mut self, token: Token, msg: &str) -> Result<Unit, String> {
+    fn consume(&mut self, token: Token, msg: &str) -> Unit {
         let unit: Unit = self.peek();
         if unit.token == token {
             self.advance();
             let token = self.previous(1);
-            return Ok(token);
+            return Ok::<Unit, String>(token).expect("failed to consume a character");
         }
         eprintln!("{}", msg);
-        Ok(unit)
+        Ok::<Unit, String>(unit).expect("failed to consume a character")
     }
 
     fn check(&mut self, token: Token) -> bool {

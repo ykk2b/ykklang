@@ -1,11 +1,7 @@
-use super::{tokenlist::Unit, types::ValueType};
+use super::{statements::Statement, tokenlist::Unit, types::ValueType};
 
 #[derive(Debug, Clone)]
 pub enum Expression {
-    ArrayExpression {
-        id: usize,
-        items: Vec<Box<Expression>>,
-    },
     MapExpression {
         id: usize,
         items: Vec<(String, Box<Expression>)>,
@@ -13,6 +9,12 @@ pub enum Expression {
     VariableExpression {
         id: usize,
         name: Unit,
+    },
+    AnonymousFunctionExpression {
+        id: usize,
+        parameters: Vec<(Unit, Unit)>,
+        value_type: Unit,
+        body: Vec<Box<Statement>>,
     },
     FunctionCallExpression {
         id: usize,

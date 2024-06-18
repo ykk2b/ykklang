@@ -1,5 +1,7 @@
 // TODO: handle parsing cli commands
 
+use std::fs::read_to_string;
+
 use clap::{Arg, ArgGroup, Command, ValueHint};
 
 pub struct CLI {
@@ -10,7 +12,7 @@ impl CLI {
     pub fn new() -> CLI {
         let matches = Command::new("YKKLanguage")
             .author("ykk2b")
-            .version("0.0.1-alpha.1")
+            .version("0.0.1-alpha.2")
             .about("Minimalistic programming language")
             .group(ArgGroup::new("main"))
             .arg(
@@ -34,10 +36,13 @@ impl CLI {
         }
     }
 
-    pub fn run(&self) -> Option<String> {
-        match self.run {
-            Some(_) => self.run.clone(),
-            None => None,
+    pub fn input(&self) -> Result<String, std::io::Error> {
+        match &self.run {
+            Some(file_path) => read_to_string(file_path),
+            None => Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "no file specified",
+            )),
         }
     }
 }
