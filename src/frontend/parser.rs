@@ -38,7 +38,7 @@ impl Parser {
         Ok(statements)
     }
     fn declaration(&mut self) -> Result<Statement, String> {
-        if self.match_types() {
+        if self.match_types() | self.match_token(Token::Public) {
             self.var_declaration()
         } else {
             self.statement()
@@ -114,13 +114,19 @@ impl Parser {
     }
 
     fn var_declaration(&mut self) -> Result<Statement, String> {
-        let value_type = self.previous(1);
+        let mut is_public = false;
+        if self.previous(1).token == Token::Public {
+            self.advance();
+            is_public = true;
+        }
+        let value_type = self.previous(0);
         if value_type.lexeme == "void" {
             eprintln!("type void isn't allowed at line {}", value_type.line_number);
         }
+        
         let name = self.consume(Identifier, "expected a variable name");
         if self.match_token(LeftParen) {
-            return self.function_declaration();
+            return self.function_declaration(is_public);
         }
         self.consume(Equal, "expected '=' after a variable name");
         let value = self.expression().expect("failed to parse an expression");
@@ -129,10 +135,11 @@ impl Parser {
             name,
             value_type,
             value,
+            is_public,
         })
     }
 
-    fn function_declaration(&mut self) -> Result<Statement, String> {
+    fn function_declaration(&mut self, is_public: bool) -> Result<Statement, String> {
         let name = self.previous(2);
         let value_type = self.previous(3);
         let mut parameters: Vec<(Unit, Unit)> = vec![];
@@ -169,6 +176,7 @@ impl Parser {
                 name,
                 parameters,
                 value_type,
+                is_public,
                 body: vec![Box::new(Statement::ReturnStatement { value: Some(body) })],
             });
         }
@@ -192,6 +200,7 @@ impl Parser {
             parameters,
             value_type,
             body,
+            is_public,
         })
     }
 
@@ -213,7 +222,7 @@ impl Parser {
 
     fn or(&mut self) -> Result<Expression, String> {
         let mut expr = self.and().expect("failed to parse an expression");
-        while self.match_token(Pipe) {
+        while self.match_token(Or) {
             let operator = self.previous(1);
             let right = self.and().expect("failed to parse an expression");
             expr = Expression::BinaryExpression {
@@ -407,7 +416,10 @@ impl Parser {
                 return self.parse_map();
             }
             _ => {
-                eprintln!("unexpected token at line {}", token.line_number);
+                eprintln!(
+                    "unexpected token ('{}') at line {}",
+                    token.lexeme, token.line_number
+                );
                 exit(1);
             }
         }

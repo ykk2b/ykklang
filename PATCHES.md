@@ -1,5 +1,10 @@
 # Patches (alpha)
 
+### v0.0.1-alpha.5
+
+- added `public` for `variable` and `function`
+- updated `and` and `or` operators
+
 ### v0.0.1-alpha.4
 
 - updated `variable` and `function` parsing logic

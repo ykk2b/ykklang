@@ -12,12 +12,14 @@ pub enum Statement {
         name: Unit,
         value_type: Unit,
         value: Expression,
+        is_public: bool,
     },
     FunctionStatement {
         name: Unit,
         parameters: Vec<(Unit, Unit)>,
         value_type: Unit,
         body: Vec<Box<Statement>>,
+        is_public: bool,
     },
     ReturnStatement {
         value: Option<Expression>,
@@ -31,9 +33,5 @@ pub enum Statement {
     ModuleStatement {
         name: Unit,
         from: Unit,
-    },
-    PublishStatement {
-        name: Unit,
-        statement: Box<Statement>,
-    },
+    }
 }

@@ -33,6 +33,8 @@ pub enum Token {
     LessEqual,
     Arrow,
     Anon,
+    AndShort,
+    Or,
     // ExactEqual,
     // ...
     If,
@@ -41,6 +43,7 @@ pub enum Token {
     From,
     Return,
     Module,
+    Public,
     EoF,
     // ...
     NumberValue,
@@ -81,6 +84,7 @@ pub fn keywords() -> HashMap<&'static str, Token> {
         ("from", Token::From),
         ("return", Token::Return),
         ("module", Token::Module),
+        ("public", Token::Public),
         ("anon", Token::Anon),
         // ...
         ("boolean", Token::BooleanValue),

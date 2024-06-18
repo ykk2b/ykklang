@@ -90,8 +90,20 @@ impl Tokenizer {
                     self.push_unit(Bang)
                 }
             }
-            '&' => self.push_unit(And),
-            '|' => self.push_unit(Pipe),
+            '&' => {
+                if self.match_char('&') {
+                    self.push_unit(And)
+                } else {
+                    self.push_unit(AndShort)
+                }
+            }
+            '|' => {
+                if self.match_char('|') {
+                    self.push_unit(Or)
+                } else {
+                    self.push_unit(Pipe)
+                }
+            }
             '#' => self.push_unit(Hash),
             '@' => self.push_unit(At),
             '?' => self.push_unit(Ask),
