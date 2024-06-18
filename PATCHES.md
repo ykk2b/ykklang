@@ -1,5 +1,11 @@
 # Patches (alpha)
 
+### v0.0.1-alpha.4
+
+- updated `variable` and `function` parsing logic
+- updated and fixed `anon` function parsing logic
+- added short functions
+
 ### v0.0.1-alpha.3
 
 - fixed type parsing

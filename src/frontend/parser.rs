@@ -38,10 +38,8 @@ impl Parser {
         Ok(statements)
     }
     fn declaration(&mut self) -> Result<Statement, String> {
-        if self.match_token(Let) {
+        if self.match_types() {
             self.var_declaration()
-        } else if self.match_token(Function) {
-            self.function_declaration()
         } else {
             self.statement()
         }
@@ -116,22 +114,14 @@ impl Parser {
     }
 
     fn var_declaration(&mut self) -> Result<Statement, String> {
+        let value_type = self.previous(1);
+        if value_type.lexeme == "void" {
+            eprintln!("type void isn't allowed at line {}", value_type.line_number);
+        }
         let name = self.consume(Identifier, "expected a variable name");
-        self.consume(Colon, "expected ':' after a variable name");
-        let value_type = if self.match_tokens(&[
-            StringValue,
-            NumberValue,
-            VoidValue,
-            NullValue,
-            BooleanValue,
-            TrueValue,
-            FalseValue,
-        ]) {
-            self.previous(1)
-        } else {
-            eprintln!("expected type after ':' at line {}", name.line_number);
-            exit(1);
-        };
+        if self.match_token(LeftParen) {
+            return self.function_declaration();
+        }
         self.consume(Equal, "expected '=' after a variable name");
         let value = self.expression().expect("failed to parse an expression");
         self.consume(Semicolon, "expected ';' after variable declaration");
@@ -143,8 +133,8 @@ impl Parser {
     }
 
     fn function_declaration(&mut self) -> Result<Statement, String> {
-        let name = self.consume(Identifier, "expected function name");
-        self.consume(LeftParen, "expected '(' after a function name");
+        let name = self.previous(2);
+        let value_type = self.previous(3);
         let mut parameters: Vec<(Unit, Unit)> = vec![];
 
         if !self.check(RightParen) {
@@ -156,15 +146,7 @@ impl Parser {
                 exit(1);
             }
             loop {
-                let paramater_type = if self.match_tokens(&[
-                    StringValue,
-                    NumberValue,
-                    VoidValue,
-                    NullValue,
-                    BooleanValue,
-                    TrueValue,
-                    FalseValue,
-                ]) {
+                let paramater_type = if self.match_types() {
                     self.previous(1)
                 } else {
                     eprintln!("expected parameter type at line {}", name.line_number);
@@ -179,23 +161,17 @@ impl Parser {
                 }
             }
         }
-
         self.consume(RightParen, "expected ')' after parameters");
-        self.consume(Arrow, "expected '->' after parameters");
-        let value_type = if self.match_tokens(&[
-            StringValue,
-            NumberValue,
-            VoidValue,
-            NullValue,
-            BooleanValue,
-            TrueValue,
-            FalseValue,
-        ]) {
-            self.previous(1)
-        } else {
-            eprintln!("expected type after '->' at line {}", name.line_number);
-            exit(1);
-        };
+        if self.match_token(Arrow) {
+            let body = self.expression().expect("failed to parse an expression");
+            self.consume(Semicolon, "expected ';' after an expression");
+            return Ok(Statement::FunctionStatement {
+                name,
+                parameters,
+                value_type,
+                body: vec![Box::new(Statement::ReturnStatement { value: Some(body) })],
+            });
+        }
         self.consume(LeftBrace, "expected '{' before function body");
 
         let body = match self
@@ -377,7 +353,6 @@ impl Parser {
                     id: self.get_id(),
                     name: self.previous(1),
                 };
-
                 if self.match_token(LeftBracket) {
                     let mut items = Vec::new();
                     while self.check(RightBracket) && self.is_at_end() {
@@ -406,63 +381,15 @@ impl Parser {
                         id: self.get_id(),
                         items,
                     };
-                } else if self.match_token(LeftParen) {
-                    let mut parameters: Vec<(Unit, Unit)> = vec![];
-
-                    if !self.check(RightParen) {
-                        if parameters.len() >= 32 {
-                            eprintln!(
-                                "function can't have more then 32 parameters, at line {}",
-                                self.previous(1).line_number
-                            );
-                            exit(1);
-                        }
-                        loop {
-                            let paramater_type =
-                                self.consume(Identifier, "expected parameter type");
-
-                            let paramater_name =
-                                self.consume(Identifier, "expected parameter name");
-
-                            parameters.push((paramater_name, paramater_type));
-                            if !self.match_token(Comma) {
-                                break;
-                            }
-                        }
-                    }
-                    self.consume(RightParen, "expected ')' after parameters");
-                    self.consume(Arrow, "expected '->' after parameters");
-                    let value_type = self.consume(Identifier, "expected type after '->'");
-                    self.consume(LeftBrace, "expected '{' before function body");
-
-                    let body = match self
-                        .block_statement()
-                        .expect("failed to parse a block statement")
-                    {
-                        Statement::BlockStatement { statements } => statements,
-                        _ => {
-                            eprintln!(
-                                "failed to parse a block statement at line {}",
-                                value_type.line_number
-                            );
-                            exit(1);
-                        }
-                    };
-
-                    expr = Expression::AnonymousFunctionExpression {
-                        id: self.get_id(),
-                        parameters,
-                        value_type,
-                        body,
-                    }
                 }
 
                 result = expr;
             }
+            Anon => result = self.parse_anon_function(),
             LeftParen => {
                 self.advance();
                 let expr = self.expression().expect("failed to parse an expression");
-                self.consume(RightParen, "Expected ')' after expression");
+                self.consume(RightParen, "expected ')' after an group");
                 result = Expression::GroupingExpression {
                     id: self.get_id(),
                     expression: Box::new(expr),
@@ -485,6 +412,74 @@ impl Parser {
             }
         }
         Ok(result)
+    }
+
+    fn parse_anon_function(&mut self) -> Expression {
+        let value_type = self.previous(3);
+        self.consume(Anon, "failed to parse an anom function");
+        self.consume(LeftParen, "expected '(' after the 'anon'");
+
+        let mut parameters: Vec<(Unit, Unit)> = vec![];
+
+        if !self.check(RightParen) {
+            if parameters.len() >= 32 {
+                eprintln!(
+                    "function can't have more then 32 parameters, at line {}",
+                    self.previous(1).line_number
+                );
+                exit(1);
+            }
+            loop {
+                let paramater_type = if self.match_types() {
+                    self.previous(1)
+                } else {
+                    eprintln!(
+                        "expected parameter type at line {}",
+                        self.previous(1).line_number
+                    );
+                    exit(1);
+                };
+
+                let paramater_name = self.consume(Identifier, "expected parameter name");
+
+                parameters.push((paramater_name, paramater_type));
+                if !self.match_token(Comma) {
+                    break;
+                }
+            }
+        }
+        self.consume(RightParen, "expected ')' after parameters");
+        if self.match_token(Arrow) {
+            let body = self.expression().expect("failed to parse an expression");
+            return Expression::AnonymousFunctionExpression {
+                id: self.get_id(),
+                parameters,
+                value_type,
+                body: vec![Box::new(Statement::ReturnStatement { value: Some(body) })],
+            };
+        }
+        self.consume(LeftBrace, "expected '{' before function body");
+
+        let body = match self
+            .block_statement()
+            .expect("failed to parse a block statement")
+        {
+            Statement::BlockStatement { statements } => statements,
+            _ => {
+                eprintln!(
+                    "failed to parse a block statement at line {}",
+                    value_type.line_number
+                );
+                exit(1);
+            }
+        };
+
+        Expression::AnonymousFunctionExpression {
+            id: self.get_id(),
+            parameters,
+            value_type,
+            body,
+        }
     }
 
     fn parse_map(&mut self) -> Result<Expression, String> {
@@ -577,6 +572,22 @@ impl Parser {
             }
         }
         false
+    }
+
+    fn match_types(&mut self) -> bool {
+        if self.match_tokens(&[
+            NumberValue,
+            StringValue,
+            BooleanValue,
+            TrueValue,
+            FalseValue,
+            NullValue,
+            VoidValue,
+        ]) {
+            true
+        } else {
+            false
+        }
     }
 
     fn advance(&mut self) -> Unit {

@@ -2,6 +2,8 @@ use crate::api::statements::Statement;
 use crate::api::tokenlist::Unit;
 use parser::Parser;
 use tokenizer::Tokenizer;
+pub mod formatter;
+pub mod optimizer;
 pub mod parser;
 pub mod tokenizer;
 
