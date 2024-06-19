@@ -1,5 +1,13 @@
 # Patches (alpha)
 
+### v0.0.1-alpha.6
+
+- updated `return` parser:
+  - now it must return an expression
+- added modules environment backend (in progress)
+- added resolver backend (in progress)
+- added expressions backend (in progress)
+
 ### v0.0.1-alpha.5
 
 - added `public` for `variable` and `function`

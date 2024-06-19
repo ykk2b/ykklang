@@ -1,6 +1,6 @@
 use super::{statements::Statement, tokenlist::Unit, types::ValueType};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum Expression {
     MapExpression {
         id: usize,

@@ -1,6 +1,6 @@
 use super::{expressions::Expression, tokenlist::Unit};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub enum Statement {
     ExpressionStatement {
         expression: Expression,
@@ -22,7 +22,7 @@ pub enum Statement {
         is_public: bool,
     },
     ReturnStatement {
-        value: Option<Expression>,
+        value: Expression,
     },
     IfStatement {
         condition: Expression,

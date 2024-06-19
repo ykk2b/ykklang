@@ -66,12 +66,7 @@ impl Parser {
     }
     fn return_statement(&mut self) -> Result<Statement, String> {
         self.previous(1);
-        let value;
-        if !self.check(Semicolon) {
-            value = Some(self.expression().expect("failed to parse an expression"));
-        } else {
-            value = None;
-        }
+        let value = self.expression().expect("failed to parse an expression");
         self.consume(Semicolon, "Expected ';' after return value;");
         Ok(Statement::ReturnStatement { value })
     }
@@ -123,7 +118,7 @@ impl Parser {
         if value_type.lexeme == "void" {
             eprintln!("type void isn't allowed at line {}", value_type.line_number);
         }
-        
+
         let name = self.consume(Identifier, "expected a variable name");
         if self.match_token(LeftParen) {
             return self.function_declaration(is_public);
@@ -177,7 +172,7 @@ impl Parser {
                 parameters,
                 value_type,
                 is_public,
-                body: vec![Box::new(Statement::ReturnStatement { value: Some(body) })],
+                body: vec![Box::new(Statement::ReturnStatement { value: body })],
             });
         }
         self.consume(LeftBrace, "expected '{' before function body");
@@ -467,7 +462,7 @@ impl Parser {
                 id: self.get_id(),
                 parameters,
                 value_type,
-                body: vec![Box::new(Statement::ReturnStatement { value: Some(body) })],
+                body: vec![Box::new(Statement::ReturnStatement { value: body })],
             };
         }
         self.consume(LeftBrace, "expected '{' before function body");
