@@ -26,32 +26,32 @@ impl Resolver {
 
     fn resolve_internal(&mut self, statement: &Statement, module: &mut Module) {
         match statement {
-            Statement::BlockStatement { statements: _ } => self.resolve_block(statement, module),
-            Statement::ExpressionStatement { expression } => {
+            Statement::Block{ statements: _ } => self.resolve_block(statement, module),
+            Statement::Expression{ expression } => {
                 self.resolve_expression(expression, module)
             }
-            Statement::FunctionStatement {
+            Statement::Function {
                 name: _,
                 parameters: _,
                 value_type: _statements,
                 body: _,
                 is_public: _,
             } => self.resolve_function(statement, Function::Yes, module),
-            Statement::IfStatement {
+            Statement::If{
                 condition: _,
                 body: _,
                 else_if_branches: _,
                 else_branch: _,
             } => self.resolve_if_statement(statement, module),
-            Statement::ModuleStatement { name: _, from: _ } => {}
-            Statement::ReturnStatement { value } => {
+            Statement::Module { name: _, from: _ } => {}
+            Statement::Return { value } => {
                 if self.current_function == Function::No {
                     eprintln!("you can't use return outside the function");
                 } else {
-                    self.resolve_expression(&value, module);
+                    self.resolve_expression(value, module);
                 }
             }
-            Statement::VariableStatement {
+            Statement::Variable{
                 name: _,
                 value_type: _,
                 value: _,
@@ -61,9 +61,9 @@ impl Resolver {
     }
     fn resolve_block(&mut self, statement: &Statement, module: &mut Module) {
         match statement {
-            Statement::BlockStatement { statements } => {
+            Statement::Block{ statements } => {
                 self.start_scope();
-                self.resolve_many(&statements.iter().map(|b| b.as_ref()).collect(), module)
+                self.resolve_many(&statements.iter().collect(), module)
             }
             _ => {
                 eprintln!("failed to resolve a block statement");
@@ -73,7 +73,7 @@ impl Resolver {
     }
     fn resolve_expression(&mut self, expression: &Expression, module: &mut Module) {
         match expression {
-            Expression::AnonymousFunctionExpression {
+            Expression::Anonymous {
                 id: _,
                 parameters,
                 value_type: _,
@@ -87,12 +87,12 @@ impl Resolver {
                     self.declare(parameter_name);
                     self.define(parameter_name);
                 }
-                self.resolve_many(&body.iter().map(|b| b.as_ref()).collect(), module);
+                self.resolve_many(&body.iter().collect(), module);
                 // TODO: add type checking here
                 self.end_scope();
                 self.current_function = enclosing_function;
             }
-            Expression::BinaryExpression {
+            Expression::Binary {
                 id: _,
                 left,
                 operator: _,
@@ -101,7 +101,7 @@ impl Resolver {
                 self.resolve_expression(left, module);
                 self.resolve_expression(right, module)
             }
-            Expression::FunctionCallExpression {
+            Expression::Call {
                 id: _,
                 name,
                 arguments,
@@ -111,30 +111,30 @@ impl Resolver {
                     self.resolve_expression(argument, module)
                 }
             }
-            Expression::GroupingExpression { id: _, expression } => {
+            Expression::Grouping { id: _, expression } => {
                 self.resolve_expression(expression, module);
             }
-            Expression::MapExpression { id: _, items } => {
+            Expression::Map { id: _, items } => {
                 for (_, expression) in items {
                     self.resolve_expression(expression, module)
                 }
             }
-            Expression::UnaryLeftExpression {
+            Expression::UnaryLeft {
                 id: _,
                 left,
                 operator: _,
             } => self.resolve_expression(left, module),
-            Expression::UnaryRightExpression {
+            Expression::UnaryRight {
                 id: _,
                 operator: _,
                 right,
             } => {
                 self.resolve_expression(right, module);
             }
-            Expression::VariableExpression { id: _, name: _ } => {
+            Expression::Variable { id: _, name: _ } => {
                 let id = expression.get_id();
                 match expression {
-                    Expression::VariableExpression { id: _, name } => {
+                    Expression::Variable { id: _, name } => {
                         if !self.scopes.is_empty() {
                             if let Some(false) =
                                 self.scopes[self.scopes.len() - 1].get(&name.lexeme)
@@ -145,13 +145,13 @@ impl Resolver {
                         }
                         self.resolve_local(name, id)
                     }
-                    Expression::FunctionCallExpression {
+                    Expression::Call {
                         id: _,
                         name,
                         arguments: _,
                     } => match name.as_ref() {
-                        Expression::VariableExpression { id: _, name } => {
-                            self.resolve_local(&name, id)
+                        Expression::Variable { id: _, name } => {
+                            self.resolve_local(name, id)
                         }
                         _ => {
                             eprintln!("failed to resolve a variable statement");
@@ -165,7 +165,7 @@ impl Resolver {
         }
     }
     fn resolve_function(&mut self, statement: &Statement, function: Function, module: &mut Module) {
-        if let Statement::FunctionStatement {
+        if let Statement::Function{
             name: _,
             parameters,
             value_type: _,
@@ -180,7 +180,7 @@ impl Resolver {
                 self.declare(parameter_name);
                 self.define(parameter_name);
             }
-            self.resolve_many(&body.iter().map(|b| b.as_ref()).collect(), module);
+            self.resolve_many(&body.iter().collect(), module);
             self.end_scope();
             self.current_function = enclosing_function
         } else {
@@ -189,7 +189,7 @@ impl Resolver {
         }
     }
     fn resolve_if_statement(&mut self, statement: &Statement, module: &mut Module) {
-        if let Statement::IfStatement {
+        if let Statement::If {
             condition,
             body,
             else_if_branches,
@@ -215,7 +215,7 @@ impl Resolver {
 
 
     fn resolve_variable(&mut self, statement: &Statement, module: &mut Module) {
-        if let Statement::VariableStatement {
+        if let Statement::Variable {
             name,
             value_type,
             value,

@@ -120,7 +120,7 @@ impl Tokenizer {
                 self.line += 1;
             }
             _ => {
-                if character.is_digit(10) {
+                if character.is_ascii_digit() {
                     self.parse_number().expect("failed to parse a number.");
                 } else if character.is_alphabetic() || character == '_' {
                     self.parse_identifier();
@@ -176,7 +176,7 @@ impl Tokenizer {
         }
     }
 
-    fn parse_string(&mut self) -> () {
+    fn parse_string(&mut self) {
         while self.peek() != '"' && !self.is_at_end() {
             if self.peek() == '\n' {
                 self.line += 1;
@@ -192,17 +192,16 @@ impl Tokenizer {
         self.advance();
         let value = &self.input[self.start + 1..self.current - 1];
         self.push_token_value(StringValue, Some(Value::String(value.to_string())));
-        Ok::<(), String>(()).expect("failed to parse a string");
     }
 
     fn parse_number(&mut self) -> Result<(), String> {
-        while self.peek().is_digit(10) {
+        while self.peek().is_ascii_digit() {
             self.advance();
         }
 
-        if self.peek() == '.' && self.peek_next().is_digit(10) {
+        if self.peek() == '.' && self.peek_next().is_ascii_digit() {
             self.advance();
-            while self.peek().is_digit(10) {
+            while self.peek().is_ascii_digit() {
                 self.advance();
             }
         }

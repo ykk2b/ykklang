@@ -7,28 +7,28 @@ use crate::api::{
 
 impl ValueType {
     pub fn from_unit(_unit: Unit) -> Self {
-        Self::NullValueType
+        Self::Null
     }
 }
 impl Expression {
     pub fn get_id(&self) -> usize {
         match self {
-            Expression::AnonymousFunctionExpression { id, .. } => *id,
-            Expression::BinaryExpression { id, .. } => *id,
-            Expression::FunctionCallExpression { id, .. } => *id,
-            Expression::GroupingExpression { id, .. } => *id,
-            Expression::MapExpression { id, .. } => *id,
-            Expression::UnaryLeftExpression { id, .. } => *id,
-            Expression::UnaryRightExpression { id, .. } => *id,
-            Expression::ValueExpression { id, .. } => *id,
-            Expression::VariableExpression { id, .. } => *id,
+            Expression::Anonymous { id, .. } => *id,
+            Expression::Binary { id, .. } => *id,
+            Expression::Call { id, .. } => *id,
+            Expression::Grouping { id, .. } => *id,
+            Expression::Map { id, .. } => *id,
+            Expression::UnaryLeft { id, .. } => *id,
+            Expression::UnaryRight { id, .. } => *id,
+            Expression::Value { id, .. } => *id,
+            Expression::Variable { id, .. } => *id,
             _ => 0,
         }
     }
     pub fn evaluate(&self, module: Module) -> ValueType {
         match self {
             // TODO
-            _ => ValueType::NullValueType,
+            _ => ValueType::Null,
         }
     }
 }

@@ -2,35 +2,35 @@ use super::{expressions::Expression, tokenlist::Unit};
 
 #[derive(Clone)]
 pub enum Statement {
-    ExpressionStatement {
+    Expression {
         expression: Expression,
     },
-    BlockStatement {
-        statements: Vec<Box<Statement>>,
+    Block {
+        statements: Vec<Statement>,
     },
-    VariableStatement {
+    Variable{
         name: Unit,
         value_type: Unit,
         value: Expression,
         is_public: bool,
     },
-    FunctionStatement {
+    Function {
         name: Unit,
         parameters: Vec<(Unit, Unit)>,
         value_type: Unit,
-        body: Vec<Box<Statement>>,
+        body: Vec<Statement>,
         is_public: bool,
     },
-    ReturnStatement {
+    Return {
         value: Expression,
     },
-    IfStatement {
+    If{
         condition: Expression,
         body: Box<Statement>,
         else_if_branches: Vec<(Vec<Expression>, Box<Statement>)>,
         else_branch: Option<Box<Statement>>,
     },
-    ModuleStatement {
+    Module {
         name: Unit,
         from: Unit,
     }

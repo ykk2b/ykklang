@@ -18,7 +18,19 @@ pub struct FunctionValueType {
     pub parameter_count: usize,
     pub parameters: Vec<(Unit, Unit)>,
     pub value_type: Unit,
-    pub body: Vec<Box<Statement>>,
+    pub body: Vec<Statement>,
+}
+
+trait ValueTypeFunction {
+    fn call(&self, args: &Vec<ValueType>) -> ValueType;
+}
+
+struct ClosuresWrapper(Box<dyn Fn(&Vec<ValueType>) -> ValueType>);
+
+impl ValueTypeFunction for ClosuresWrapper {
+    fn call(&self, args: &Vec<ValueType>) -> ValueType {
+        (self.0)(args)
+    }
 }
 
 #[derive(Clone)]
@@ -27,25 +39,25 @@ pub struct AnonFunctionValueType {
     pub parameter_count: usize,
     pub parameters: Vec<(Unit, Unit)>,
     pub value_type: Unit,
-    pub body: Vec<Box<Statement>>,
+    pub body: Vec<Statement>,
 }
 
 #[derive(Clone)]
 pub struct DeclaredFunctionValueType {
     pub name: String,
     pub parameter_count: usize,
-    pub function: Rc<dyn Fn(&Vec<ValueType>) -> ValueType>,
+    pub function: Rc<dyn ValueTypeFunction>,
 }
 
 #[derive(Clone)]
 pub enum ValueType {
-    NumberValueType(f32),
-    StringValueType(String),
-    MapValueType(Vec<ValueType>),
-    FunctionValueType(DeclaredFunctionValueType),
-    BooleanValueType(bool),
-    TrueValueType,
-    FalseValueType,
-    NullValueType,
-    VoidValueType,
+    Number(f32),
+    String(String),
+    Map(Vec<ValueType>),
+    Function(DeclaredFunctionValueType),
+    Boolean(bool),
+    True,
+    False,
+    Null,
+    Void,
 }

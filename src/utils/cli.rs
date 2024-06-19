@@ -4,15 +4,15 @@ use std::fs::read_to_string;
 
 use clap::{Arg, ArgGroup, Command, ValueHint};
 
-pub struct CLI {
+pub struct Cli {
     pub run: Option<String>,
 }
 
-impl CLI {
-    pub fn new() -> CLI {
+impl Cli {
+    pub fn new() -> Cli {
         let matches = Command::new("YKKLanguage")
             .author("ykk2b")
-            .version("0.0.1-alpha.6")
+            .version("0.0.1-alpha.7")
             .about("Minimalistic programming language")
             .group(ArgGroup::new("main"))
             .arg(
@@ -28,7 +28,7 @@ impl CLI {
             )
             .get_matches();
 
-        CLI {
+            Cli {
             run: matches
                 .clone()
                 .get_one::<String>("run")

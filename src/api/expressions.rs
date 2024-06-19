@@ -2,46 +2,46 @@ use super::{statements::Statement, tokenlist::Unit, types::ValueType};
 
 #[derive(Clone)]
 pub enum Expression {
-    MapExpression {
+    Map {
         id: usize,
         items: Vec<(String, Box<Expression>)>,
     },
-    VariableExpression {
+    Variable {
         id: usize,
         name: Unit,
     },
-    AnonymousFunctionExpression {
+    Anonymous {
         id: usize,
         parameters: Vec<(Unit, Unit)>,
         value_type: Unit,
-        body: Vec<Box<Statement>>,
+        body: Vec<Statement>,
     },
-    FunctionCallExpression {
+    Call {
         id: usize,
         name: Box<Expression>,
         arguments: Vec<Expression>,
     },
-    UnaryLeftExpression {
+    UnaryLeft {
         id: usize,
         left: Box<Expression>,
         operator: Unit,
     },
-    UnaryRightExpression {
+    UnaryRight {
         id: usize,
         operator: Unit,
         right: Box<Expression>,
     },
-    BinaryExpression {
+    Binary {
         id: usize,
         left: Box<Expression>,
         operator: Unit,
         right: Box<Expression>,
     },
-    GroupingExpression {
+    Grouping {
         id: usize,
         expression: Box<Expression>,
     },
-    ValueExpression {
+    Value {
         id: usize,
         value: ValueType,
     },

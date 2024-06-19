@@ -90,10 +90,7 @@ impl Module {
         if distance.is_none() {
             match &self.enclosing {
                 Some(env) => env.assign_internal(name, value, distance),
-                None => match self.values.borrow_mut().insert(name.to_string(), value) {
-                    Some(_) => true,
-                    None => false,
-                },
+                None => self.values.borrow_mut().insert(name.to_string(), value).is_some(),
             }
         } else {
             let distance = distance.expect("failed to get a distance");

@@ -62,13 +62,13 @@ impl Parser {
         self.consume(From, "expected 'from' after the module name");
         let from = self.consume(StringValue, "expected module destination");
         self.consume(Semicolon, "expected ';' after value");
-        Ok(Statement::ModuleStatement { name, from })
+        Ok(Statement::Module { name, from })
     }
     fn return_statement(&mut self) -> Result<Statement, String> {
         self.previous(1);
         let value = self.expression().expect("failed to parse an expression");
         self.consume(Semicolon, "Expected ';' after return value;");
-        Ok(Statement::ReturnStatement { value })
+        Ok(Statement::Return { value })
     }
     fn if_statement(&mut self) -> Result<Statement, String> {
         let condition = self.expression().expect("failed to parse an expression");
@@ -94,7 +94,7 @@ impl Parser {
             None
         };
 
-        Ok(Statement::IfStatement {
+        Ok(Statement::If {
             condition,
             body,
             else_if_branches,
@@ -105,7 +105,7 @@ impl Parser {
     fn expression_statement(&mut self) -> Result<Statement, String> {
         let expression = self.expression().expect("failed to parse an expression");
         self.consume(Semicolon, "expected ';' after expression");
-        Ok(Statement::ExpressionStatement { expression })
+        Ok(Statement::Expression { expression })
     }
 
     fn var_declaration(&mut self) -> Result<Statement, String> {
@@ -126,7 +126,7 @@ impl Parser {
         self.consume(Equal, "expected '=' after a variable name");
         let value = self.expression().expect("failed to parse an expression");
         self.consume(Semicolon, "expected ';' after variable declaration");
-        Ok(Statement::VariableStatement {
+        Ok(Statement::Variable{
             name,
             value_type,
             value,
@@ -167,12 +167,12 @@ impl Parser {
         if self.match_token(Arrow) {
             let body = self.expression().expect("failed to parse an expression");
             self.consume(Semicolon, "expected ';' after an expression");
-            return Ok(Statement::FunctionStatement {
+            return Ok(Statement::Function {
                 name,
                 parameters,
                 value_type,
                 is_public,
-                body: vec![Box::new(Statement::ReturnStatement { value: body })],
+                body: vec![Statement::Return { value: body }],
             });
         }
         self.consume(LeftBrace, "expected '{' before function body");
@@ -181,7 +181,7 @@ impl Parser {
             .block_statement()
             .expect("failed to parse a block statement")
         {
-            Statement::BlockStatement { statements } => statements,
+            Statement::Block { statements } => statements,
             _ => {
                 eprintln!(
                     "failed to parse a block statement at line {}",
@@ -190,7 +190,7 @@ impl Parser {
                 exit(1);
             }
         };
-        Ok(Statement::FunctionStatement {
+        Ok(Statement::Function {
             name,
             parameters,
             value_type,
@@ -203,10 +203,10 @@ impl Parser {
         let mut statements = vec![];
         while !self.check(RightBrace) && !self.is_at_end() {
             let declaration = self.declaration().expect("failed to parse a declaration");
-            statements.push(Box::new(declaration));
+            statements.push(declaration);
         }
         self.consume(RightBrace, "expected '}' after a block");
-        Ok(Statement::BlockStatement { statements })
+        Ok(Statement::Block{ statements })
     }
 
     fn expression(&mut self) -> Result<Expression, String> {
@@ -220,7 +220,7 @@ impl Parser {
         while self.match_token(Or) {
             let operator = self.previous(1);
             let right = self.and().expect("failed to parse an expression");
-            expr = Expression::BinaryExpression {
+            expr = Expression::Binary {
                 id: self.get_id(),
                 left: Box::new(expr),
                 operator,
@@ -235,7 +235,7 @@ impl Parser {
         while self.match_token(And) {
             let operator = self.previous(1);
             let right = self.equality().expect("failed to parse an expression");
-            expr = Expression::BinaryExpression {
+            expr = Expression::Binary {
                 id: self.get_id(),
                 left: Box::new(expr),
                 operator,
@@ -250,7 +250,7 @@ impl Parser {
         while self.match_tokens(&[BangEqual, EqualEqual]) {
             let operator = self.previous(1);
             let rhs = self.comparasion().expect("failed to parse an expression");
-            expr = Expression::BinaryExpression {
+            expr = Expression::Binary {
                 id: self.get_id(),
                 left: Box::from(expr),
                 operator,
@@ -265,7 +265,7 @@ impl Parser {
         while self.match_tokens(&[More, MoreEqual, Less, LessEqual]) {
             let op = self.previous(1);
             let rhs = self.term().expect("failed to parse an expression");
-            expr = Expression::BinaryExpression {
+            expr = Expression::Binary {
                 id: self.get_id(),
                 left: Box::from(expr),
                 operator: op,
@@ -280,7 +280,7 @@ impl Parser {
         while self.match_tokens(&[Minus, Plus]) {
             let op = self.previous(1);
             let rhs = self.factor().expect("failed to parse an expression");
-            expr = Expression::BinaryExpression {
+            expr = Expression::Binary {
                 id: self.get_id(),
                 left: Box::from(expr),
                 operator: op,
@@ -295,7 +295,7 @@ impl Parser {
         while self.match_tokens(&[Slash, Asteric]) {
             let op = self.previous(1);
             let rhs = self.unary_right().expect("failed to parse an expression");
-            expr = Expression::BinaryExpression {
+            expr = Expression::Binary {
                 id: self.get_id(),
                 left: Box::from(expr),
                 operator: op,
@@ -309,7 +309,7 @@ impl Parser {
         if self.match_tokens(&[Percent]) {
             let op = self.previous(1);
             let rhs = self.unary_right().expect("failed to parse an expression");
-            Ok(Expression::UnaryRightExpression {
+            Ok(Expression::UnaryRight {
                 id: self.get_id(),
                 operator: op,
                 right: Box::from(rhs),
@@ -323,7 +323,7 @@ impl Parser {
         if self.match_tokens(&[Bang, Minus]) {
             let op = self.previous(1);
             let rhs = self.unary_left().expect("failed to parse an expression");
-            Ok(Expression::UnaryLeftExpression {
+            Ok(Expression::UnaryLeft {
                 id: self.get_id(),
                 left: Box::from(rhs),
                 operator: op,
@@ -353,7 +353,7 @@ impl Parser {
         match token.token {
             Identifier => {
                 self.advance();
-                let mut expr = Expression::VariableExpression {
+                let mut expr = Expression::Variable {
                     id: self.get_id(),
                     name: self.previous(1),
                 };
@@ -381,7 +381,7 @@ impl Parser {
                     }
                     self.consume(RightBracket, "Expected ']' after map elements.");
 
-                    expr = Expression::MapExpression {
+                    expr = Expression::Map {
                         id: self.get_id(),
                         items,
                     };
@@ -394,7 +394,7 @@ impl Parser {
                 self.advance();
                 let expr = self.expression().expect("failed to parse an expression");
                 self.consume(RightParen, "expected ')' after an group");
-                result = Expression::GroupingExpression {
+                result = Expression::Grouping {
                     id: self.get_id(),
                     expression: Box::new(expr),
                 };
@@ -402,7 +402,7 @@ impl Parser {
             FalseValue | TrueValue | NullValue | NumberValue | StringValue | VoidValue
             | BooleanValue => {
                 self.advance();
-                result = Expression::ValueExpression {
+                result = Expression::Value {
                     id: self.get_id(),
                     value: ValueType::from_unit(token),
                 };
@@ -458,11 +458,11 @@ impl Parser {
         self.consume(RightParen, "expected ')' after parameters");
         if self.match_token(Arrow) {
             let body = self.expression().expect("failed to parse an expression");
-            return Expression::AnonymousFunctionExpression {
+            return Expression::Anonymous {
                 id: self.get_id(),
                 parameters,
                 value_type,
-                body: vec![Box::new(Statement::ReturnStatement { value: body })],
+                body: vec![Statement::Return { value: body }],
             };
         }
         self.consume(LeftBrace, "expected '{' before function body");
@@ -471,7 +471,7 @@ impl Parser {
             .block_statement()
             .expect("failed to parse a block statement")
         {
-            Statement::BlockStatement { statements } => statements,
+            Statement::Block{ statements } => statements,
             _ => {
                 eprintln!(
                     "failed to parse a block statement at line {}",
@@ -481,7 +481,7 @@ impl Parser {
             }
         };
 
-        Expression::AnonymousFunctionExpression {
+        Expression::Anonymous {
             id: self.get_id(),
             parameters,
             value_type,
@@ -514,7 +514,7 @@ impl Parser {
         }
         self.consume(RightBracket, "Expect ']' after array elements.");
 
-        Ok(Expression::MapExpression {
+        Ok(Expression::Map {
             id: self.get_id(),
             items,
         })
@@ -537,7 +537,7 @@ impl Parser {
             }
         }
         self.consume(RightParen, "expected ')' after arguments.");
-        Ok(Expression::FunctionCallExpression {
+        Ok(Expression::Call {
             id: self.get_id(),
             name: Box::new(callee),
             arguments,
@@ -549,12 +549,11 @@ impl Parser {
         if unit.token == token {
             self.advance();
             let token = self.previous(1);
-            return Ok::<Unit, String>(token).expect("failed to consume a character");
+            return token;
         }
 
         eprintln!("{}, at line {}", msg, unit.line_number);
-        Ok::<Unit, String>(unit.clone())
-            .expect(format!("failed to consume a character at line {}", unit.line_number).as_str())
+        unit.clone()
     }
 
     fn check(&mut self, token: Token) -> bool {
@@ -582,7 +581,7 @@ impl Parser {
     }
 
     fn match_types(&mut self) -> bool {
-        if self.match_tokens(&[
+        !self.match_tokens(&[
             NumberValue,
             StringValue,
             BooleanValue,
@@ -590,11 +589,7 @@ impl Parser {
             FalseValue,
             NullValue,
             VoidValue,
-        ]) {
-            true
-        } else {
-            false
-        }
+        ])
     }
 
     fn advance(&mut self) -> Unit {

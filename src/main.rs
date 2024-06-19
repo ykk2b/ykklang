@@ -4,12 +4,12 @@ mod frontend;
 use std::process::exit;
 
 use frontend::frontend;
-use utils::cli::CLI;
+use utils::cli::Cli;
 mod utils;
 
 fn main() {
-    let cli = CLI::new();
-    let input = match CLI::input(&cli) {
+    let cli = Cli::new();
+    let input = match Cli::input(&cli) {
         Ok(content) => content,
         Err(e) => {
             eprintln!("Failed to read file: {}", e);
