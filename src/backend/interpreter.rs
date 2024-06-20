@@ -67,7 +67,7 @@ impl Interpreter {
                     if is_true {
                         self.interpret(vec![body]);
                     } else {
-                        let mut executed = false;
+                        let executed = false;
                         for (else_if_predicates, else_if_statement) in else_if_branches {
                             let mut all_true = true;
                             for else_if_predicate in else_if_predicates {
@@ -90,7 +90,7 @@ impl Interpreter {
                         }
                     }
                 }
-                Statement::Module { name, from } => {
+                Statement::Module { name: _, from: _ } => {
                     // TODO
                 }
                 Statement::Return { value } => {
@@ -115,7 +115,7 @@ impl Interpreter {
             }
         }
     }
-    fn wrap_function(&self, statement: &Statement) -> FunctionValueType {
+    pub fn wrap_function(&self, statement: &Statement) -> FunctionValueType {
         if let Statement::Function {
             name,
             parameters,
@@ -136,7 +136,7 @@ impl Interpreter {
                 parent_module: self.module.clone(),
                 body,
                 value_type: value_type.clone(),
-                is_public: is_public.clone(),
+                is_public: *is_public,
             }
         } else {
             eprintln!("failed to declare a function");

@@ -4,7 +4,7 @@ use crate::api::types::{Module, ValueType};
 
 
 fn get_values() -> Rc<RefCell<HashMap<String, ValueType>>> {
-    let mut env = HashMap::new();
+    let env = HashMap::new();
     Rc::new(RefCell::new(env))
 }
 

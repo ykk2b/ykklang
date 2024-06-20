@@ -1,4 +1,5 @@
 use super::{statements::Statement, tokenlist::Unit};
+use core::fmt;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 #[derive(Clone, PartialEq, Debug)]
@@ -22,11 +23,21 @@ pub struct FunctionValueType {
     pub is_public: bool,
 }
 
-trait ValueTypeFunction {
+pub trait ValueTypeFunction {
     fn call(&self, args: &Vec<ValueType>) -> ValueType;
 }
 
-struct ClosuresWrapper(Box<dyn Fn(&Vec<ValueType>) -> ValueType>);
+pub trait RcValueTypeFunctionEq {
+    fn rc_eq(&self, other: &Self) -> bool;
+}
+
+impl RcValueTypeFunctionEq for Rc<dyn ValueTypeFunction> {
+    fn rc_eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(self, other)
+    }
+}
+
+pub struct ClosuresWrapper(pub Box<dyn Fn(&Vec<ValueType>) -> ValueType>);
 
 impl ValueTypeFunction for ClosuresWrapper {
     fn call(&self, args: &Vec<ValueType>) -> ValueType {
@@ -34,7 +45,7 @@ impl ValueTypeFunction for ClosuresWrapper {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct AnonFunctionValueType {
     pub parent_module: Module,
     pub parameter_count: usize,
@@ -43,11 +54,25 @@ pub struct AnonFunctionValueType {
     pub body: Vec<Statement>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct DeclaredFunctionValueType {
     pub name: String,
     pub parameter_count: usize,
     pub function: Rc<dyn ValueTypeFunction>,
+}
+
+impl PartialEq for DeclaredFunctionValueType {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+            && self.parameter_count == other.parameter_count
+            && self.function.rc_eq(&other.function)
+    }
+}
+
+impl fmt::Debug for dyn ValueTypeFunction {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "ValueTypeFunction")
+    }
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -56,6 +81,8 @@ pub enum ValueType {
     String(String),
     Map(Vec<ValueType>),
     Function(FunctionValueType),
+    AnonFunction(AnonFunctionValueType),
+    DeclaredFunction(DeclaredFunctionValueType),
     Boolean(bool),
     True,
     False,

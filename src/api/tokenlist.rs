@@ -65,6 +65,7 @@ impl std::fmt::Display for Token {
 pub enum Value {
     Number(f32),
     String(String),
+    _Boolean(bool),
 }
 
 #[derive(Debug, Clone, PartialEq)]

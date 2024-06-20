@@ -12,7 +12,7 @@ impl Cli {
     pub fn new() -> Cli {
         let matches = Command::new("YKKLanguage")
             .author("ykk2b")
-            .version("0.0.1-alpha.8")
+            .version("0.0.1-alpha.9")
             .about("Minimalistic programming language")
             .group(ArgGroup::new("main"))
             .arg(

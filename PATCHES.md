@@ -1,5 +1,14 @@
 # Patches (alpha)
 
+### v0.0.1-alpha.9
+
+- minor fixes
+- progressed expression backened (in progress)
+- fix variable does not need to be mutable [(#4)](https://github.com/ykk2b/ykklang/security/code-scanning/4)
+- fix using clone on type bool which implements the Copy trait [(#252)](https://github.com/ykk2b/ykklang/security/code-scanning/252)
+- fix length comparison to zero [(#250,#251)](https://github.com/ykk2b/ykklang/security/code-scanning/251)
+- fix casting float literal to f32 is unnecessary [(#249)](https://github.com/ykk2b/ykklang/security/code-scanning/249)
+
 ### v0.0.1-alpha.8
 
 - switched to mdbooks for documentation
