@@ -3,6 +3,7 @@ mod backend;
 mod frontend;
 use std::process::exit;
 
+use backend::{backend, interpreter::Interpreter};
 use frontend::frontend;
 use utils::cli::Cli;
 mod utils;
@@ -16,5 +17,7 @@ fn main() {
             exit(1);
         }
     };
-    frontend(&input);
+    let interpreter = Interpreter::new();
+    let statements = frontend(&input);
+    backend(statements, interpreter);
 }

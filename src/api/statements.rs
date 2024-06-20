@@ -1,6 +1,6 @@
 use super::{expressions::Expression, tokenlist::Unit};
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum Statement {
     Expression {
         expression: Expression,

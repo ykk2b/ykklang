@@ -1,6 +1,6 @@
 use super::{statements::Statement, tokenlist::Unit, types::ValueType};
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum Expression {
     Map {
         id: usize,
@@ -21,15 +21,10 @@ pub enum Expression {
         name: Box<Expression>,
         arguments: Vec<Expression>,
     },
-    UnaryLeft {
+    Unary{
         id: usize,
         left: Box<Expression>,
         operator: Unit,
-    },
-    UnaryRight {
-        id: usize,
-        operator: Unit,
-        right: Box<Expression>,
     },
     Binary {
         id: usize,

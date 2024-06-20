@@ -23,13 +23,18 @@ impl Resolver {
             current_function: Function::No,
         }
     }
-
+    pub fn resolve(
+        &mut self,
+        statements: &Vec<&Statement>,
+        module: &mut Module,
+    ) -> HashMap<usize, usize> {
+        self.resolve_many(statements, module);
+        self.locals.clone()
+    }
     fn resolve_internal(&mut self, statement: &Statement, module: &mut Module) {
         match statement {
-            Statement::Block{ statements: _ } => self.resolve_block(statement, module),
-            Statement::Expression{ expression } => {
-                self.resolve_expression(expression, module)
-            }
+            Statement::Block { statements: _ } => self.resolve_block(statement, module),
+            Statement::Expression { expression } => self.resolve_expression(expression, module),
             Statement::Function {
                 name: _,
                 parameters: _,
@@ -37,7 +42,7 @@ impl Resolver {
                 body: _,
                 is_public: _,
             } => self.resolve_function(statement, Function::Yes, module),
-            Statement::If{
+            Statement::If {
                 condition: _,
                 body: _,
                 else_if_branches: _,
@@ -51,7 +56,7 @@ impl Resolver {
                     self.resolve_expression(value, module);
                 }
             }
-            Statement::Variable{
+            Statement::Variable {
                 name: _,
                 value_type: _,
                 value: _,
@@ -61,7 +66,7 @@ impl Resolver {
     }
     fn resolve_block(&mut self, statement: &Statement, module: &mut Module) {
         match statement {
-            Statement::Block{ statements } => {
+            Statement::Block { statements } => {
                 self.start_scope();
                 self.resolve_many(&statements.iter().collect(), module)
             }
@@ -119,18 +124,11 @@ impl Resolver {
                     self.resolve_expression(expression, module)
                 }
             }
-            Expression::UnaryLeft {
+            Expression::Unary {
                 id: _,
                 left,
                 operator: _,
             } => self.resolve_expression(left, module),
-            Expression::UnaryRight {
-                id: _,
-                operator: _,
-                right,
-            } => {
-                self.resolve_expression(right, module);
-            }
             Expression::Variable { id: _, name: _ } => {
                 let id = expression.get_id();
                 match expression {
@@ -150,9 +148,7 @@ impl Resolver {
                         name,
                         arguments: _,
                     } => match name.as_ref() {
-                        Expression::Variable { id: _, name } => {
-                            self.resolve_local(name, id)
-                        }
+                        Expression::Variable { id: _, name } => self.resolve_local(name, id),
                         _ => {
                             eprintln!("failed to resolve a variable statement");
                             exit(1);
@@ -165,7 +161,7 @@ impl Resolver {
         }
     }
     fn resolve_function(&mut self, statement: &Statement, function: Function, module: &mut Module) {
-        if let Statement::Function{
+        if let Statement::Function {
             name: _,
             parameters,
             value_type: _,
@@ -212,7 +208,6 @@ impl Resolver {
             exit(1);
         }
     }
-
 
     fn resolve_variable(&mut self, statement: &Statement, module: &mut Module) {
         if let Statement::Variable {

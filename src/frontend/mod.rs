@@ -11,6 +11,5 @@ pub fn frontend(input: &str) -> Vec<Statement> {
     let tokenizer = Tokenizer::new(input.to_string());
     let tokens: Vec<Unit> = tokenizer.clone().tokenize().unwrap();
     let mut parser = Parser::new(tokens);
-    let statements = parser.parse();
-    statements.unwrap()
+    parser.parse()
 }

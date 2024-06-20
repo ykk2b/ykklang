@@ -1,3 +1,3 @@
 # YKKLang
 
-A minimalistic functional programming language. Just for the educational and entertaitment purposes.
+A minimalistic and purely functional programming language.

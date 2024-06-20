@@ -6,8 +6,47 @@ use crate::api::{
 };
 
 impl ValueType {
+    // TODO
     pub fn from_unit(_unit: Unit) -> Self {
         Self::Null
+    }
+    pub fn is_truthy(&self) -> ValueType {
+        match self {
+            Self::Number(x) => {
+                if *x == 0.0 as f32 {
+                    Self::False
+                } else {
+                    Self::True
+                }
+            }
+            Self::String(s) => {
+                if s.len() == 0 {
+                    Self::False
+                } else {
+                    Self::True
+                }
+            }
+            Self::Map(x) => {
+                if x.len() == 0 {
+                    Self::False
+                } else {
+                    Self::True
+                }
+            }
+            Self::Boolean(b) => {
+                if *b {
+                    Self::True
+                } else {
+                    Self::False
+                }
+            }
+            Self::False => Self::False,
+            Self::True => Self::True,
+            // TODO
+            Self::Function(_) => Self::False,
+            Self::Null => Self::False,
+            Self::Void => Self::False,
+        }
     }
 }
 impl Expression {
@@ -18,14 +57,12 @@ impl Expression {
             Expression::Call { id, .. } => *id,
             Expression::Grouping { id, .. } => *id,
             Expression::Map { id, .. } => *id,
-            Expression::UnaryLeft { id, .. } => *id,
-            Expression::UnaryRight { id, .. } => *id,
+            Expression::Unary { id, .. } => *id,
             Expression::Value { id, .. } => *id,
             Expression::Variable { id, .. } => *id,
-            _ => 0,
         }
     }
-    pub fn evaluate(&self, module: Module) -> ValueType {
+    pub fn evaluate(&self, _module: Module) -> ValueType {
         match self {
             // TODO
             _ => ValueType::Null,

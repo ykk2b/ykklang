@@ -1,5 +1,14 @@
 # Patches (alpha)
 
+### v0.0.1-alpha.8
+
+- switched to mdbooks for documentation
+- removed `UnaryRight`
+- progressed expressions backend (in progress)
+- finished statements interpreter
+- assembled backend
+- updated parser
+
 ### v0.0.1-alpha.7
 
 - fixed name CLI contains a capitalized acronym [(#160)](https://github.com/ykk2b/ykklang/security/code-scanning/160)
