@@ -82,7 +82,7 @@ pub enum ValueType {
     Map(Vec<ValueType>),
     Function(FunctionValueType),
     AnonFunction(AnonFunctionValueType),
-    DeclaredFunction(DeclaredFunctionValueType),
+    _DeclaredFunction(DeclaredFunctionValueType),
     Boolean(bool),
     True,
     False,

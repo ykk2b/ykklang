@@ -107,7 +107,6 @@ impl Parser {
             value_type = self.previous(0);
         } else {
             value_type = self.previous(1);
-            self.step_back(1);
         }
         if value_type.lexeme == "void" {
             eprintln!("type void isn't allowed at line {}", value_type.line_number);
@@ -260,7 +259,7 @@ impl Parser {
                     id: self.get_id(),
                     name: self.previous(1),
                 };
-                
+
                 if self.match_token(LeftBracket) {
                     let mut items = Vec::new();
                     while self.check(RightBracket) && self.is_at_end() {
@@ -481,7 +480,7 @@ impl Parser {
     }
 
     fn match_types(&mut self) -> bool {
-        !self.match_tokens(&[
+        self.match_tokens(&[
             NumberValue,
             StringValue,
             BooleanValue,

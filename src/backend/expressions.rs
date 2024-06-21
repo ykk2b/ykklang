@@ -90,7 +90,7 @@ impl ValueType {
             // TODO
             Self::Function(_) => Self::False,
             Self::AnonFunction(_) => Self::False,
-            Self::DeclaredFunction(_) => Self::False,
+            Self::_DeclaredFunction(_) => Self::False,
             Self::Null => Self::False,
             Self::Void => Self::False,
         }
@@ -125,7 +125,7 @@ impl Expression {
             } => {
                 let function = AnonFunctionValueType {
                     parameters: parameters.clone(),
-                    parameter_count: parameters.len().clone(),
+                    parameter_count: parameters.len(),
                     parent_module: module.clone(),
                     value_type: value_type.clone(),
                     body: body.clone(),
@@ -165,7 +165,7 @@ impl Expression {
                 let callable: ValueType = (*name).evaluate(module.clone());
                 match callable {
                     ValueType::Function(function) => run_function(function, arguments, module),
-                    ValueType::DeclaredFunction(fun) => {
+                    ValueType::_DeclaredFunction(fun) => {
                         let mut evaluated_args = vec![];
                         for arg in arguments {
                             evaluated_args.push(arg.evaluate(module.clone()));
@@ -212,7 +212,32 @@ impl Expression {
                     (ValueType::Number(x), Token::Plus, ValueType::Number(y)) => {
                         ValueType::Number(x + y)
                     }
-                    // TODO
+                    (ValueType::Number(x), Token::Minus, ValueType::Number(y)) => {
+                        ValueType::Number(x - y)
+                    }
+                    (ValueType::Number(x), Token::Asteric, ValueType::Number(y)) => {
+                        ValueType::Number(x * y)
+                    }
+                    (ValueType::Number(x), Token::Slash, ValueType::Number(y)) => {
+                        ValueType::Number(x / y)
+                    }
+                    (ValueType::Number(x), Token::Percent, ValueType::Number(y)) => {
+                        ValueType::Number(x % y)
+                    }
+                    (ValueType::Number(x), Token::More, ValueType::Number(y)) => {
+                        ValueType::Boolean(x > y)
+                    }
+                    (ValueType::Number(x), Token::MoreEqual, ValueType::Number(y)) => {
+                        ValueType::Boolean(x >= y)
+                    }
+                    (ValueType::Number(x), Token::Less, ValueType::Number(y)) => {
+                        ValueType::Boolean(x < y)
+                    }
+                    (ValueType::Number(x), Token::LessEqual, ValueType::Number(y)) => {
+                        ValueType::Boolean(x <= y)
+                    }
+                    (x, Token::EqualEqual, y) => ValueType::Boolean(x == y),
+                    (x, Token::BangEqual, y) => ValueType::Boolean(x != y),
                     (_, _, _) => ValueType::Null,
                 }
             }
@@ -222,9 +247,10 @@ impl Expression {
                 left,
                 operator,
             } => {
-                let _lleft = left.evaluate(module);
-                match (&left, operator.token) {
-                    // TODO
+                let lleft = left.evaluate(module);
+                match (lleft, operator.token) {
+                    (ValueType::Number(x), Token::Minus) => ValueType::Number(-x),
+                    (x, Token::Bang) => x.is_truthy(),
                     (_, _) => ValueType::Null,
                 }
             }
@@ -233,10 +259,53 @@ impl Expression {
 }
 
 pub fn run_function(
-    _function: FunctionValueType,
-    _arguments: &Vec<Expression>,
-    _module: Module,
+    function: FunctionValueType,
+    arguments: &[Expression],
+    module: Module,
 ) -> ValueType {
+    if arguments.len() != function.parameter_count {
+        eprintln!("invalid parameter count");
+        exit(1)
+    }
+    let mut argument_values = vec![];
+    for argument in arguments {
+        argument_values.push(argument.evaluate(module.clone()))
+    }
+    let function_module = function.parent_module.enclose();
+    for (i, value) in argument_values.iter().enumerate() {
+        if i < function.parameters.len() {
+            let (param_name_token, param_name_type) = &function.parameters[i];
+            let param_name = &param_name_token.lexeme;
+            let param_type = &param_name_type.lexeme;
+
+            match (param_type.as_str(), value) {
+                // TODO
+                ("number", ValueType::Number(_)) => {}
+                ("boolean", ValueType::Boolean(_)) => {}
+                ("false", ValueType::False) => {}
+                ("true", ValueType::True) => {}
+                _ => {
+                    eprintln!("error: invalid value type");
+                    exit(1);
+                }
+            }
+            function_module.define(param_name.clone(), value.clone());
+        } else {
+            eprintln!("number of called arguments doesnt match functions parameter count");
+            exit(1);
+        }
+    }
+
     // TODO
+    // let mut int = Interpreter::new_with_module(function_module);
+    // for statement in function.body.iter() {
+    //     let result = int.interpret(vec![statement]);
+    //     let value = int.specials.get("return");
+    // }
+
+    if function.value_type.lexeme != "void" {
+        eprintln!("invalid function output value type");
+        exit(1)
+    }
     ValueType::Void
 }

@@ -19,10 +19,10 @@ impl Module {
             enclosing: None,
         }
     }
-    pub fn get_value_type(&self, name: &str) -> Option<String> {
+    pub fn _get_value_type(&self, name: &str) -> Option<String> {
         self.value_types.borrow().get(name).cloned()
     }
-    pub fn get_public_value_type(&self, name: &str) -> Option<String> {
+    pub fn _get_public_value_type(&self, name: &str) -> Option<String> {
         self.public_value_types.borrow().get(name).cloned()
     }
     pub fn set_value_type(&self, name: String, types: String) {
@@ -81,15 +81,15 @@ impl Module {
         }
     }
 
-    pub fn assign(&self, name: &str, value: ValueType, expression_id: usize) -> bool {
+    pub fn _assign(&self, name: &str, value: ValueType, expression_id: usize) -> bool {
         let distance = self.locals.borrow().get(&expression_id).cloned();
-        self.assign_internal(name, value, distance)
+        self._assign_internal(name, value, distance)
     }
 
-    fn assign_internal(&self, name: &str, value: ValueType, distance: Option<usize>) -> bool {
+    fn _assign_internal(&self, name: &str, value: ValueType, distance: Option<usize>) -> bool {
         if distance.is_none() {
             match &self.enclosing {
-                Some(env) => env.assign_internal(name, value, distance),
+                Some(env) => env._assign_internal(name, value, distance),
                 None => self.values.borrow_mut().insert(name.to_string(), value).is_some(),
             }
         } else {
@@ -103,7 +103,7 @@ impl Module {
                         eprintln!("failed to resolve a variable");
                         exit(1)
                     }
-                    Some(env) => env.assign_internal(name, value, Some(distance - 1)),
+                    Some(env) => env._assign_internal(name, value, Some(distance - 1)),
                 }
             }
         }
