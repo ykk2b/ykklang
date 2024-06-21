@@ -122,7 +122,7 @@ impl Tokenizer {
             _ => {
                 if character.is_ascii_digit() {
                     self.parse_number().expect("failed to parse a number.");
-                } else if character.is_alphabetic() || character == '_' {
+                } else if character.is_alphabetic() || character == '_' || self.peek() == '!' {
                     self.parse_identifier();
                 } else {
                     eprintln!("unexpected character (line {}): {}", self.line, character);
@@ -213,7 +213,7 @@ impl Tokenizer {
     }
 
     fn parse_identifier(&mut self) {
-        while self.peek().is_alphanumeric() || self.peek() == '_' {
+        while self.peek().is_alphanumeric() || self.peek() == '_' || self.peek() == '!' {
             self.advance();
         }
 

@@ -1,10 +1,15 @@
 # Patches (alpha)
 
+### v0.0.1-alpha.11
+
+- added `print!` builting function
+- minor fixes
+
 ### v0.0.1-alpha.10
 
 - finished expression interpreter
 - fixed writing &Vec instead of &[_] involves a new object where a slice will do [(#260)](https://github.com/ykk2b/ykklang/security/code-scanning/260)
-- fixed using clone on type usize which implements the Copy trait [(#258)]
+- fixed using clone on type usize which implements the Copy trait [(#258)](https://github.com/ykk2b/ykklang/security/code-scanning/258)
 - fixed minor bugs
 
 ### v0.0.1-alpha.9

@@ -488,7 +488,6 @@ impl Parser {
             FalseValue,
             NullValue,
             VoidValue,
-            Identifier,
         ])
     }
 
@@ -497,11 +496,6 @@ impl Parser {
             self.current += 1;
         }
         self.previous(1)
-    }
-
-    fn step_back(&mut self, by: usize) -> Unit {
-        self.current -= by;
-        self.peek_by(by)
     }
 
     fn previous(&mut self, steps_back: usize) -> Unit {
@@ -523,9 +517,5 @@ impl Parser {
 
     fn peek(&mut self) -> Unit {
         self.units[self.current].clone()
-    }
-
-    fn peek_by(&mut self, by: usize) -> Unit {
-        self.units[self.current + by].clone()
     }
 }

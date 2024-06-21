@@ -1,9 +1,12 @@
-use std::{collections::HashMap, process::exit};
+use std::{collections::HashMap, process::exit, rc::Rc};
 
 use crate::api::{
     statements::Statement,
     tokenlist::Unit,
-    types::{FunctionValueType, Module, ValueType},
+    types::{
+        ClosuresWrapper, DeclaredFunctionValueType, FunctionValueType, Module, ValueType,
+        ValueTypeFunction,
+    },
 };
 
 pub struct Interpreter {
@@ -11,12 +14,45 @@ pub struct Interpreter {
     pub module: Module,
 }
 
+pub fn declare_builtin(
+    name: String,
+    arguments: usize,
+    function: Rc<dyn ValueTypeFunction>,
+    module: &mut Module,
+) {
+    module.define(
+        name.clone(),
+        ValueType::DeclaredFunction(DeclaredFunctionValueType {
+            name: name.clone(),
+            parameter_count: arguments,
+            function,
+        }),
+    );
+}
 impl Interpreter {
     pub fn new() -> Self {
-        Self {
+        let mut interpreter = Self {
             specials: HashMap::new(),
             module: Module::new(HashMap::new()),
-        }
+        };
+        declare_builtin(
+            "print!".to_string(),
+            1,
+            Rc::new(ClosuresWrapper {
+                0: Box::new(|args: &Vec<ValueType>| {
+                    if args.len() == 1 {
+                        println!("{:?}", args[0]);
+                    } else {
+                        eprint!("invalid number of arguments for print!");
+                        exit(1);
+                    }
+                    ValueType::Null
+                }),
+            }),
+            &mut interpreter.module,
+        );
+
+        interpreter
     }
     pub fn new_with_module(module: Module) -> Self {
         Self {

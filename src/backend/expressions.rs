@@ -90,7 +90,7 @@ impl ValueType {
             // TODO
             Self::Function(_) => Self::False,
             Self::AnonFunction(_) => Self::False,
-            Self::_DeclaredFunction(_) => Self::False,
+            Self::DeclaredFunction(_) => Self::False,
             Self::Null => Self::False,
             Self::Void => Self::False,
         }
@@ -165,7 +165,7 @@ impl Expression {
                 let callable: ValueType = (*name).evaluate(module.clone());
                 match callable {
                     ValueType::Function(function) => run_function(function, arguments, module),
-                    ValueType::_DeclaredFunction(fun) => {
+                    ValueType::DeclaredFunction(fun) => {
                         let mut evaluated_args = vec![];
                         for arg in arguments {
                             evaluated_args.push(arg.evaluate(module.clone()));
