@@ -1,7 +1,7 @@
-use crate::api::expressions::Expression;
+use crate::api::Expression;
 use crate::api::tokenlist::Token::{self, *};
 use crate::api::types::ValueType;
-use crate::api::{statements::Statement, tokenlist::Unit};
+use crate::api::{Statement, tokenlist::Unit};
 use std::process::exit;
 
 pub struct Parser {
@@ -178,8 +178,19 @@ impl Parser {
     fn binary(&mut self) -> Expression {
         let mut expr: Expression = self.unary();
         while self.match_tokens(&[
-            Or, More, MoreEqual, Less, LessEqual, And, BangEqual, EqualEqual, Minus, Plus, Slash,
-            Asteric, Percent,
+            Or,
+            Greater,
+            GreaterEqual,
+            Less,
+            LessEqual,
+            And,
+            BangEqual,
+            EqualEqual,
+            Minus,
+            Plus,
+            Division,
+            Multiplication,
+            Percent,
         ]) {
             let op = self.previous(1);
             let rhs = self.unary();
@@ -388,7 +399,7 @@ impl Parser {
             TrueValue,
             FalseValue,
             NullValue,
-            VoidValue
+            VoidValue,
         ])
     }
 

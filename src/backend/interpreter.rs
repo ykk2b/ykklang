@@ -1,7 +1,7 @@
 use std::{collections::HashMap, process::exit, rc::Rc};
 
 use crate::api::{
-    statements::Statement,
+    Statement,
     tokenlist::Unit,
     types::{
         ClosuresWrapper, DeclaredFunctionValueType, FunctionValueType, Module, ValueType,
@@ -35,11 +35,12 @@ impl Interpreter {
             specials: HashMap::new(),
             module: Module::new(HashMap::new()),
         };
+        // clippy::init_numbered_fields
         declare_builtin(
             "print!".to_string(),
             1,
             Rc::new(ClosuresWrapper {
-                0: Box::new(|args: &Vec<ValueType>| {
+                0: Box::new(|args: &[ValueType]| {
                     if args.len() == 1 {
                         println!("{:?}", args[0]);
                     } else {
@@ -86,7 +87,8 @@ impl Interpreter {
                     let callable = self.wrap_function(statement);
                     let function = ValueType::Function(callable);
                     if *is_public {
-                        self.module.define_public(name.lexeme.clone(), function.clone());
+                        self.module
+                            .define_public(name.lexeme.clone(), function.clone());
                         self.module.define(name.lexeme.clone(), function);
                     } else {
                         self.module.define(name.lexeme.clone(), function)

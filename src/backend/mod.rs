@@ -1,7 +1,7 @@
 use interpreter::Interpreter;
 use resolver::Resolver;
 
-use crate::api::statements::Statement;
+use crate::api::Statement;
 
 pub mod expressions;
 pub mod interpreter;
