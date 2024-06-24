@@ -86,7 +86,8 @@ impl Interpreter {
                     let callable = self.wrap_function(statement);
                     let function = ValueType::Function(callable);
                     if *is_public {
-                        self.module.define_public(name.lexeme.clone(), function)
+                        self.module.define_public(name.lexeme.clone(), function.clone());
+                        self.module.define(name.lexeme.clone(), function);
                     } else {
                         self.module.define(name.lexeme.clone(), function)
                     }
@@ -132,21 +133,6 @@ impl Interpreter {
                 Statement::Return { value } => {
                     let eval = value.evaluate(self.module.clone());
                     self.specials.insert("return".to_string(), eval);
-                }
-                Statement::Variable {
-                    name,
-                    value_type: _,
-                    value,
-                    is_public,
-                } => {
-                    let value = value.evaluate(self.module.clone());
-
-                    if *is_public {
-                        self.module
-                            .define_public(name.lexeme.clone(), value.clone());
-                    } else {
-                        self.module.define(name.lexeme.clone(), value.clone());
-                    }
                 }
             }
         }

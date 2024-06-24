@@ -8,12 +8,6 @@ pub enum Statement {
     Block {
         statements: Vec<Statement>,
     },
-    Variable{
-        name: Unit,
-        value_type: Unit,
-        value: Expression,
-        is_public: bool,
-    },
     Function {
         name: Unit,
         parameters: Vec<(Unit, Unit)>,

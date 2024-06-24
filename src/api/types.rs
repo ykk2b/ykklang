@@ -6,8 +6,6 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 pub struct Module {
     pub values: Rc<RefCell<HashMap<String, ValueType>>>,
     pub public_values: Rc<RefCell<HashMap<String, ValueType>>>,
-    pub value_types: Rc<RefCell<HashMap<String, String>>>,
-    pub public_value_types: Rc<RefCell<HashMap<String, String>>>,
     pub locals: Rc<RefCell<HashMap<usize, usize>>>,
     pub enclosing: Option<Box<Module>>,
 }
@@ -81,7 +79,6 @@ pub enum ValueType {
     String(String),
     Map(Vec<ValueType>),
     Function(FunctionValueType),
-    AnonFunction(AnonFunctionValueType),
     DeclaredFunction(DeclaredFunctionValueType),
     Boolean(bool),
     True,

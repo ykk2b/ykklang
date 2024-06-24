@@ -1,4 +1,4 @@
-use super::{statements::Statement, tokenlist::Unit, types::ValueType};
+use super::{tokenlist::Unit, types::ValueType};
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Expression {
@@ -9,12 +9,6 @@ pub enum Expression {
     Variable {
         id: usize,
         name: Unit,
-    },
-    Anonymous {
-        id: usize,
-        parameters: Vec<(Unit, Unit)>,
-        value_type: Unit,
-        body: Vec<Statement>,
     },
     Call {
         id: usize,

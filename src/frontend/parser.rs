@@ -33,7 +33,7 @@ impl Parser {
 
     fn statement(&mut self) -> Statement {
         if self.match_types() | self.match_token(Token::Public) {
-            self.var_declaration()
+            self.declaration()
         } else if self.match_token(LeftBrace) {
             self.block_statement()
         } else if self.match_token(If) {
@@ -97,49 +97,21 @@ impl Parser {
         Statement::Expression { expression }
     }
 
-    fn var_declaration(&mut self) -> Statement {
+    fn declaration(&mut self) -> Statement {
         let mut is_public = false;
         let value_type;
 
         if self.previous(1).token == Token::Public {
             self.advance();
             is_public = true;
-            value_type = self.previous(0);
+            value_type = self.previous(1);
         } else {
             value_type = self.previous(1);
         }
-        if value_type.lexeme == "void" {
-            eprintln!("type void isn't allowed at line {}", value_type.line_number);
-        }
         let name = self.consume(Identifier, "expected a variable name");
-        if self.match_token(LeftParen) {
-            return self.function_declaration(is_public);
-        }
-
-        self.consume(Equal, "expected '=' after a variable name");
-        let value = self.expression();
-        self.consume(Semicolon, "expected ';' after variable declaration");
-        Statement::Variable {
-            name,
-            value_type,
-            value,
-            is_public,
-        }
-    }
-
-    fn function_declaration(&mut self, is_public: bool) -> Statement {
-        let name = self.previous(2);
-        let value_type = self.previous(3);
         let mut parameters: Vec<(Unit, Unit)> = vec![];
-
+        self.consume(LeftParen, "expected '(' after variable name");
         if !self.check(RightParen) {
-            if parameters.len() >= 32 {
-                eprintln!(
-                    "function can't have more then 32 parameters, at line {}",
-                    name.line_number
-                );
-                exit(1);
-            }
             loop {
                 let paramater_type = if self.match_types() {
                     self.previous(1)
@@ -292,7 +264,6 @@ impl Parser {
 
                 result = expr;
             }
-            Anon => result = self.parse_anon_function(),
             LeftParen => {
                 self.advance();
                 let expr = self.expression();
@@ -322,71 +293,6 @@ impl Parser {
             }
         }
         result
-    }
-
-    fn parse_anon_function(&mut self) -> Expression {
-        let value_type = self.previous(3);
-        self.consume(Anon, "failed to parse an anom function");
-        self.consume(LeftParen, "expected '(' after the 'anon'");
-
-        let mut parameters: Vec<(Unit, Unit)> = vec![];
-
-        if !self.check(RightParen) {
-            if parameters.len() >= 32 {
-                eprintln!(
-                    "function can't have more then 32 parameters, at line {}",
-                    self.previous(1).line_number
-                );
-                exit(1);
-            }
-            loop {
-                let paramater_type = if self.match_types() {
-                    self.previous(1)
-                } else {
-                    eprintln!(
-                        "expected parameter type at line {}",
-                        self.previous(1).line_number
-                    );
-                    exit(1);
-                };
-
-                let paramater_name = self.consume(Identifier, "expected parameter name");
-
-                parameters.push((paramater_name, paramater_type));
-                if !self.match_token(Comma) {
-                    break;
-                }
-            }
-        }
-        self.consume(RightParen, "expected ')' after parameters");
-        if self.match_token(Arrow) {
-            let body = self.expression();
-            return Expression::Anonymous {
-                id: self.get_id(),
-                parameters,
-                value_type,
-                body: vec![Statement::Return { value: body }],
-            };
-        }
-        self.consume(LeftBrace, "expected '{' before function body");
-
-        let body = match self.block_statement() {
-            Statement::Block { statements } => statements,
-            _ => {
-                eprintln!(
-                    "failed to parse a block statement at line {}",
-                    value_type.line_number
-                );
-                exit(1);
-            }
-        };
-
-        Expression::Anonymous {
-            id: self.get_id(),
-            parameters,
-            value_type,
-            body,
-        }
     }
 
     fn parse_map(&mut self) -> Expression {
@@ -426,12 +332,7 @@ impl Parser {
             loop {
                 let arg = self.expression();
                 arguments.push(arg);
-                if arguments.len() >= 32 {
-                    eprintln!(
-                        "function can't have more then 32 arguments, at line {}",
-                        self.previous(1).line_number
-                    );
-                } else if !self.match_token(Comma) {
+                if !self.match_token(Comma) {
                     break;
                 }
             }
@@ -487,7 +388,7 @@ impl Parser {
             TrueValue,
             FalseValue,
             NullValue,
-            VoidValue,
+            VoidValue
         ])
     }
 

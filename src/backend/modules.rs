@@ -13,30 +13,14 @@ impl Module {
         Self {
             values: get_values(),
             public_values: get_values(),
-            value_types: Rc::new(RefCell::new(HashMap::new())),
-            public_value_types: Rc::new(RefCell::new(HashMap::new())),
             locals: Rc::new(RefCell::new(locals)),
             enclosing: None,
         }
-    }
-    pub fn _get_value_type(&self, name: &str) -> Option<String> {
-        self.value_types.borrow().get(name).cloned()
-    }
-    pub fn _get_public_value_type(&self, name: &str) -> Option<String> {
-        self.public_value_types.borrow().get(name).cloned()
-    }
-    pub fn set_value_type(&self, name: String, types: String) {
-        self.value_types.borrow_mut().insert(name, types);
-    }
-    pub fn set_public_value_type(&self, name: String, types: String) {
-        self.value_types.borrow_mut().insert(name, types);
     }
     pub fn enclose(&self) -> Module {
         Self {
             values: Rc::new(RefCell::new(HashMap::new())),
             public_values: Rc::new(RefCell::new(HashMap::new())),
-            value_types: self.value_types.clone(),
-            public_value_types: self.public_value_types.clone(),
             locals: self.locals.clone(),
             enclosing: Some(Box::new(self.clone())),
         }
@@ -76,34 +60,6 @@ impl Module {
                         assert!(distance > 0);
                         env.get_internal(name, Some(distance - 1))
                     }
-                }
-            }
-        }
-    }
-
-    pub fn _assign(&self, name: &str, value: ValueType, expression_id: usize) -> bool {
-        let distance = self.locals.borrow().get(&expression_id).cloned();
-        self._assign_internal(name, value, distance)
-    }
-
-    fn _assign_internal(&self, name: &str, value: ValueType, distance: Option<usize>) -> bool {
-        if distance.is_none() {
-            match &self.enclosing {
-                Some(env) => env._assign_internal(name, value, distance),
-                None => self.values.borrow_mut().insert(name.to_string(), value).is_some(),
-            }
-        } else {
-            let distance = distance.expect("failed to get a distance");
-            if distance == 0 {
-                self.values.borrow_mut().insert(name.to_string(), value);
-                true
-            } else {
-                match &self.enclosing {
-                    None => {
-                        eprintln!("failed to resolve a variable");
-                        exit(1)
-                    }
-                    Some(env) => env._assign_internal(name, value, Some(distance - 1)),
                 }
             }
         }

@@ -1,5 +1,11 @@
 # Patches (alpha)
 
+### v0.0.1-alpha.12
+
+- add tokenizer tests (in progress)
+- fixed functions
+- removed variables and anon functions
+
 ### v0.0.1-alpha.11
 
 - added `print!` builting function

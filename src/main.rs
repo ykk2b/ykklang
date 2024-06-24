@@ -1,8 +1,8 @@
 mod api;
 mod backend;
 mod frontend;
+mod tests;
 use std::process::exit;
-
 use backend::{backend, interpreter::Interpreter};
 use frontend::frontend;
 use utils::cli::Cli;
@@ -13,7 +13,7 @@ fn main() {
     let input = match Cli::input(&cli) {
         Ok(content) => content,
         Err(e) => {
-            eprintln!("Failed to read file: {}", e);
+            eprintln!("failed to read file: {}", e);
             exit(1);
         }
     };

@@ -56,12 +56,6 @@ impl Resolver {
                     self.resolve_expression(value, module);
                 }
             }
-            Statement::Variable {
-                name: _,
-                value_type: _,
-                value: _,
-                is_public: _,
-            } => self.resolve_variable(statement, module),
         }
     }
     fn resolve_block(&mut self, statement: &Statement, module: &mut Module) {
@@ -78,25 +72,6 @@ impl Resolver {
     }
     fn resolve_expression(&mut self, expression: &Expression, module: &mut Module) {
         match expression {
-            Expression::Anonymous {
-                id: _,
-                parameters,
-                value_type: _,
-                body,
-            } => {
-                let enclosing_function = self.current_function;
-                self.current_function = Function::Yes;
-                self.start_scope();
-                for (parameter_name, _paramater_type) in parameters {
-                    // TODO: add type checking here
-                    self.declare(parameter_name);
-                    self.define(parameter_name);
-                }
-                self.resolve_many(&body.iter().collect(), module);
-                // TODO: add type checking here
-                self.end_scope();
-                self.current_function = enclosing_function;
-            }
             Expression::Binary {
                 id: _,
                 left,
@@ -178,7 +153,7 @@ impl Resolver {
             }
             self.resolve_many(&body.iter().collect(), module);
             self.end_scope();
-            self.current_function = enclosing_function
+            self.current_function = enclosing_function;
         } else {
             eprintln!("failed to resolve non-function statement");
             exit(1);
@@ -209,30 +184,6 @@ impl Resolver {
         }
     }
 
-    fn resolve_variable(&mut self, statement: &Statement, module: &mut Module) {
-        if let Statement::Variable {
-            name,
-            value_type,
-            value,
-            is_public,
-        } = statement
-        {
-            self.declare(name);
-            let new_value = (*value).evaluate(module.clone());
-            let _value_clone = new_value.clone();
-
-            // TODO: type checking
-            if *is_public {
-                module.set_public_value_type(name.lexeme.clone(), value_type.lexeme.clone());
-            }
-            module.set_value_type(name.lexeme.clone(), value_type.lexeme.clone());
-            //
-
-            self.resolve_expression(value, module);
-            self.define(name);
-        }
-    }
-
     fn start_scope(&mut self) {
         self.scopes.push(HashMap::new());
     }
@@ -247,18 +198,14 @@ impl Resolver {
             eprintln!("'{}' is already declared", name.lexeme.clone());
             exit(1)
         }
-        self.scopes[size - 1]
-            .insert(name.lexeme.clone(), false)
-            .expect("stack overflow");
+        self.scopes[size - 1].insert(name.lexeme.clone(), false);
     }
     fn define(&mut self, name: &Unit) {
         if self.scopes.is_empty() {
             return;
         }
         let size = self.scopes.len();
-        self.scopes[size - 1]
-            .insert(name.lexeme.clone(), true)
-            .expect("stack overflow");
+        self.scopes[size - 1].insert(name.lexeme.clone(), true);
     }
     fn resolve_local(&mut self, name: &Unit, id: usize) {
         let size = self.scopes.len();
@@ -268,9 +215,7 @@ impl Resolver {
         for i in (0..=(size - 1)).rev() {
             let scope = &self.scopes[i];
             if scope.contains_key(&name.lexeme) {
-                self.locals
-                    .insert(id, size - i - 1)
-                    .expect("stack overflow");
+                self.locals.insert(id, size - i - 1);
                 return;
             }
         }

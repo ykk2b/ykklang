@@ -88,7 +88,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="introduction.html" class="active"><strong aria-hidden="true">1.</strong> Introduction</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html" class="active">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Getting Started</li><li class="chapter-item expanded "><a href="01-getting-started/installation.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li class="chapter-item expanded "><a href="01-getting-started/hello-world.html"><strong aria-hidden="true">2.</strong> Hello World</a></li><li class="chapter-item expanded affix "><li class="part-title">Concepts</li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">3.</strong> Paradigms</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">4.</strong> Variables</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">5.</strong> Data Types</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">5.1.</strong> Number</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">5.2.</strong> String</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">5.3.</strong> Boolean</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">5.4.</strong> Null/Void</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">5.5.</strong> Map</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">5.6.</strong> Function</a></li></ol></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">6.</strong> Functions</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">6.1.</strong> Parameters</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">6.2.</strong> Return</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">6.3.</strong> Recursion</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">6.4.</strong> HOF</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">6.5.</strong> Anonymous</a></li></ol></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">7.</strong> If</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">8.</strong> Comments</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">9.</strong> Expressions</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">10.</strong> Error Handling</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">11.</strong> Modules</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">11.1.</strong> public</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">11.2.</strong> module</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">11.3.</strong> built-in</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Advanced</li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">12.</strong> Type System</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">13.</strong> Modules</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">14.</strong> Side-Effects</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">15.</strong> Environments</a></li><li class="chapter-item expanded affix "><li class="part-title">API</li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">16.</strong> Keywords</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">17.</strong> Statements</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">18.</strong> Operators</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">19.</strong> Versioning</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -173,18 +173,15 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="ykklang"><a class="header" href="#ykklang">YKKLang</a></h1>
-<p>YKKLagd is a minimalistic, purely functional and statically typed general-purpose programming language. <a href="https://github.com/ykk2b">I</a> am developing this project for the educational and entertainment purposes (to not die from boredom), meaning it is not intended for widespread adoption or mass use. This language is designed for personal use and ejoyment, but I encourage anyone to use, modify and distribute this software. Some of the code I used comes from YouTube channel <a href="https://www.youtube.com/@codescope6903">CodeScope</a>, Rust <a href="https://github.com/ykk2b/rust/tree/master/compiler">compiler</a> and from LLMs, but the design of the language and most parts of the software are written by me.</p>
-<h2 id="philosophy"><a class="header" href="#philosophy">Philosophy</a></h2>
-<p>The philosophy of the language is to be purely functional, focusing on readiblity and enhanced developer experience. Why should you use this language? I don't know, perhaps you shouldn't use it. However, any kind of feedback would be appreciated.</p>
-<h2 id="how-to-read-this-documentation"><a class="header" href="#how-to-read-this-documentation">How To Read This Documentation</a></h2>
-<p>Documentation is under the development alongside the language. Most parts of the language is still to be written, but will guide you how to read this documentation right after finishing and documenting the language.</p>
-
+                        
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
 
+                            <a rel="next prefetch" href="01-getting-started/installation.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -193,10 +190,29 @@
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
 
+                    <a rel="next prefetch" href="01-getting-started/installation.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>
 
+        <!-- Livereload script (if served using the cli tool) -->
+        <script>
+            const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsAddress = wsProtocol + "//" + location.host + "/" + "__livereload";
+            const socket = new WebSocket(wsAddress);
+            socket.onmessage = function (event) {
+                if (event.data === "reload") {
+                    socket.close();
+                    location.reload();
+                }
+            };
+
+            window.onbeforeunload = function() {
+                socket.close();
+            }
+        </script>
 
 
 

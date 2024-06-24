@@ -5,14 +5,28 @@ use std::{
 
 use crate::api::{
     expressions::Expression,
-    statements::Statement,
     tokenlist::{Token, Unit, Value},
-    types::{AnonFunctionValueType, FunctionValueType, Module, ValueType},
+    types::{FunctionValueType, Module, ValueType},
 };
 
 use super::interpreter::Interpreter;
 
 impl ValueType {
+    pub fn to_string(&self) -> String {
+        match self {
+            ValueType::Map(_) => "map".to_string(),
+            ValueType::Boolean(bool) => bool.to_string(),
+            ValueType::DeclaredFunction(fun) => format!("{}()", fun.name),
+            ValueType::False => "false".to_string(),
+            ValueType::True => "true".to_string(),
+            ValueType::Null => "null".to_string(),
+            ValueType::Void => "void".to_string(),
+            ValueType::Number(_) => "number".to_string(),
+            ValueType::String(_) => "string".to_string(),
+            _ => "unknown".to_string(),
+        }
+    }
+
     pub fn from_unit(unit: Unit) -> Self {
         match unit.token {
             Token::NumberValue => {
@@ -89,7 +103,6 @@ impl ValueType {
             Self::True => Self::True,
             // TODO
             Self::Function(_) => Self::False,
-            Self::AnonFunction(_) => Self::False,
             Self::DeclaredFunction(_) => Self::False,
             Self::Null => Self::False,
             Self::Void => Self::False,
@@ -102,10 +115,10 @@ impl Hash for Expression {
         std::ptr::hash(self, state)
     }
 }
+impl Eq for Expression {}
 impl Expression {
     pub fn get_id(&self) -> usize {
         match self {
-            Expression::Anonymous { id, .. } => *id,
             Expression::Binary { id, .. } => *id,
             Expression::Call { id, .. } => *id,
             Expression::Grouping { id, .. } => *id,
@@ -117,38 +130,6 @@ impl Expression {
     }
     pub fn evaluate(&self, module: Module) -> ValueType {
         match self {
-            Expression::Anonymous {
-                id: _,
-                parameters,
-                value_type,
-                body,
-            } => {
-                let function = AnonFunctionValueType {
-                    parameters: parameters.clone(),
-                    parameter_count: parameters.len(),
-                    parent_module: module.clone(),
-                    value_type: value_type.clone(),
-                    body: body.clone(),
-                };
-                let callback = module.enclose();
-
-                let int = Interpreter::new_with_module(callback.clone());
-                let callable = int.wrap_function(&Statement::Function {
-                    name: Unit {
-                        token: Token::Identifier,
-                        lexeme: "anon".to_string(),
-                        value: None,
-                        line_number: value_type.clone().line_number,
-                    },
-                    parameters: function.clone().parameters,
-                    value_type: function.clone().value_type,
-                    body: function.clone().body,
-                    is_public: false,
-                });
-                let fun = ValueType::Function(callable.clone());
-                module.define("anon".to_string(), fun);
-                ValueType::AnonFunction(function)
-            }
             Expression::Map { id: _, items } => {
                 let mut evaluated_map: Vec<ValueType> = Vec::new();
 
@@ -277,7 +258,6 @@ pub fn run_function(
             let (param_name_token, param_name_type) = &function.parameters[i];
             let param_name = &param_name_token.lexeme;
             let param_type = &param_name_type.lexeme;
-
             match (param_type.as_str(), value) {
                 // TODO
                 ("number", ValueType::Number(_)) => {}
@@ -296,12 +276,20 @@ pub fn run_function(
         }
     }
 
-    // TODO
-    // let mut int = Interpreter::new_with_module(function_module);
-    // for statement in function.body.iter() {
-    //     let result = int.interpret(vec![statement]);
-    //     let value = int.specials.get("return");
-    // }
+    let mut int = Interpreter::new_with_module(function_module);
+    for statement in function.body.iter() {
+        int.interpret(vec![statement]);
+        let value = int.specials.get("return");
+        return if value.is_some() {
+            if !(function.value_type.lexeme == value.clone().expect("TODO").to_string()) {
+                eprintln!("invalid function output value type");
+                exit(1);
+            }
+            value.clone().unwrap().clone()
+        } else {
+            ValueType::Void
+        };
+    }
 
     if function.value_type.lexeme != "void" {
         eprintln!("invalid function output value type");
