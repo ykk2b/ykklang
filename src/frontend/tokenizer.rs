@@ -42,13 +42,7 @@ impl Tokenizer {
     fn collect_tokens(&mut self) -> Result<(), String> {
         let character = self.advance();
         match character {
-            ':' => {
-                if self.match_char('=') {
-                    self.push_unit(ColonEqual)
-                } else {
-                    self.push_unit(Colon)
-                }
-            }
+            ':' => self.push_unit(Colon),
             ',' => self.push_unit(Comma),
             '.' => self.push_unit(Dot),
             '+' => self.push_unit(Plus),
@@ -59,8 +53,8 @@ impl Tokenizer {
                     self.push_unit(Minus)
                 }
             }
-            '*' => self.push_unit(Asteric),
-            '/' => self.push_unit(Slash),
+            '*' => self.push_unit(Multiplication),
+            '/' => self.push_unit(Division),
             '%' => self.push_unit(Percent),
             '=' => {
                 if self.match_char('=') {
@@ -71,9 +65,9 @@ impl Tokenizer {
             }
             '>' => {
                 if self.match_char('=') {
-                    self.push_unit(MoreEqual)
+                    self.push_unit(GreaterEqual)
                 } else {
-                    self.push_unit(More)
+                    self.push_unit(Greater)
                 }
             }
             '<' => {
@@ -106,7 +100,7 @@ impl Tokenizer {
             }
             '#' => self.push_unit(Hash),
             '@' => self.push_unit(At),
-            '?' => self.push_unit(Ask),
+            '?' => self.push_unit(QuestionMark),
             '{' => self.push_unit(LeftBrace),
             '}' => self.push_unit(RightBrace),
             '(' => self.push_unit(LeftParen),

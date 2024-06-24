@@ -1,10 +1,11 @@
+use core::fmt;
 use std::{
     hash::{Hash, Hasher},
     process::exit,
 };
 
 use crate::api::{
-    expressions::Expression,
+    Expression,
     tokenlist::{Token, Unit, Value},
     types::{FunctionValueType, Module, ValueType},
 };
@@ -12,21 +13,6 @@ use crate::api::{
 use super::interpreter::Interpreter;
 
 impl ValueType {
-    pub fn to_string(&self) -> String {
-        match self {
-            ValueType::Map(_) => "map".to_string(),
-            ValueType::Boolean(bool) => bool.to_string(),
-            ValueType::DeclaredFunction(fun) => format!("{}()", fun.name),
-            ValueType::False => "false".to_string(),
-            ValueType::True => "true".to_string(),
-            ValueType::Null => "null".to_string(),
-            ValueType::Void => "void".to_string(),
-            ValueType::Number(_) => "number".to_string(),
-            ValueType::String(_) => "string".to_string(),
-            _ => "unknown".to_string(),
-        }
-    }
-
     pub fn from_unit(unit: Unit) -> Self {
         match unit.token {
             Token::NumberValue => {
@@ -107,6 +93,24 @@ impl ValueType {
             Self::Null => Self::False,
             Self::Void => Self::False,
         }
+    }
+}
+
+impl fmt::Display for ValueType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let res = match self {
+            ValueType::Map(_) => "map".to_string(),
+            ValueType::Boolean(bool) => bool.to_string(),
+            ValueType::DeclaredFunction(fun) => format!("{}()", fun.name),
+            ValueType::False => "false".to_string(),
+            ValueType::True => "true".to_string(),
+            ValueType::Null => "null".to_string(),
+            ValueType::Void => "void".to_string(),
+            ValueType::Number(_) => "number".to_string(),
+            ValueType::String(_) => "string".to_string(),
+            _ => "unknown".to_string(),
+        };
+        write!(f, "{res}")
     }
 }
 
@@ -196,19 +200,19 @@ impl Expression {
                     (ValueType::Number(x), Token::Minus, ValueType::Number(y)) => {
                         ValueType::Number(x - y)
                     }
-                    (ValueType::Number(x), Token::Asteric, ValueType::Number(y)) => {
+                    (ValueType::Number(x), Token::Multiplication, ValueType::Number(y)) => {
                         ValueType::Number(x * y)
                     }
-                    (ValueType::Number(x), Token::Slash, ValueType::Number(y)) => {
+                    (ValueType::Number(x), Token::Division, ValueType::Number(y)) => {
                         ValueType::Number(x / y)
                     }
                     (ValueType::Number(x), Token::Percent, ValueType::Number(y)) => {
                         ValueType::Number(x % y)
                     }
-                    (ValueType::Number(x), Token::More, ValueType::Number(y)) => {
+                    (ValueType::Number(x), Token::Greater, ValueType::Number(y)) => {
                         ValueType::Boolean(x > y)
                     }
-                    (ValueType::Number(x), Token::MoreEqual, ValueType::Number(y)) => {
+                    (ValueType::Number(x), Token::GreaterEqual, ValueType::Number(y)) => {
                         ValueType::Boolean(x >= y)
                     }
                     (ValueType::Number(x), Token::Less, ValueType::Number(y)) => {
@@ -280,15 +284,14 @@ pub fn run_function(
     for statement in function.body.iter() {
         int.interpret(vec![statement]);
         let value = int.specials.get("return");
-        return if value.is_some() {
-            if !(function.value_type.lexeme == value.clone().expect("TODO").to_string()) {
+        if value.is_some() {
+            let returned_value = value.unwrap().clone();
+            if function.value_type.lexeme != returned_value.to_string() {
                 eprintln!("invalid function output value type");
                 exit(1);
             }
-            value.clone().unwrap().clone()
-        } else {
-            ValueType::Void
-        };
+            return returned_value;
+        }
     }
 
     if function.value_type.lexeme != "void" {

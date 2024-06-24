@@ -1,4 +1,4 @@
-use super::{statements::Statement, tokenlist::Unit};
+use super::{tokenlist::Unit, Statement};
 use core::fmt;
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
@@ -22,7 +22,7 @@ pub struct FunctionValueType {
 }
 
 pub trait ValueTypeFunction {
-    fn call(&self, args: &Vec<ValueType>) -> ValueType;
+    fn call(&self, args: &[ValueType]) -> ValueType;
 }
 
 pub trait RcValueTypeFunctionEq {
@@ -35,22 +35,14 @@ impl RcValueTypeFunctionEq for Rc<dyn ValueTypeFunction> {
     }
 }
 
-pub struct ClosuresWrapper(pub Box<dyn Fn(&Vec<ValueType>) -> ValueType>);
+pub struct ClosuresWrapper(pub Box<dyn Fn(&[ValueType]) -> ValueType>);
 
 impl ValueTypeFunction for ClosuresWrapper {
-    fn call(&self, args: &Vec<ValueType>) -> ValueType {
+    fn call(&self, args: &[ValueType]) -> ValueType {
         (self.0)(args)
     }
 }
 
-#[derive(Clone, PartialEq, Debug)]
-pub struct AnonFunctionValueType {
-    pub parent_module: Module,
-    pub parameter_count: usize,
-    pub parameters: Vec<(Unit, Unit)>,
-    pub value_type: Unit,
-    pub body: Vec<Statement>,
-}
 
 #[derive(Clone, Debug)]
 pub struct DeclaredFunctionValueType {

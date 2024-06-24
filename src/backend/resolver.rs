@@ -1,9 +1,8 @@
 use std::{collections::HashMap, process::exit};
-
-use crate::api::{expressions::Expression, statements::Statement, tokenlist::Unit, types::Module};
+use crate::api::{Expression, Statement, tokenlist::Unit, types::Module};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
-enum Function {
+enum IsFunction {
     Yes,
     No,
 }
@@ -12,7 +11,7 @@ enum Function {
 pub struct Resolver {
     scopes: Vec<HashMap<String, bool>>,
     locals: HashMap<usize, usize>,
-    current_function: Function,
+    current_function: IsFunction,
 }
 
 impl Resolver {
@@ -20,7 +19,7 @@ impl Resolver {
         Self {
             scopes: vec![],
             locals: HashMap::new(),
-            current_function: Function::No,
+            current_function: IsFunction::No,
         }
     }
     pub fn resolve(
@@ -34,14 +33,14 @@ impl Resolver {
     fn resolve_internal(&mut self, statement: &Statement, module: &mut Module) {
         match statement {
             Statement::Block { statements: _ } => self.resolve_block(statement, module),
-            Statement::Expression { expression } => self.resolve_expression(expression, module),
+            Statement::Expression { expression } => self.resolve_expression(expression),
             Statement::Function {
                 name: _,
                 parameters: _,
                 value_type: _statements,
                 body: _,
                 is_public: _,
-            } => self.resolve_function(statement, Function::Yes, module),
+            } => self.resolve_function(statement, IsFunction::Yes, module),
             Statement::If {
                 condition: _,
                 body: _,
@@ -50,10 +49,10 @@ impl Resolver {
             } => self.resolve_if_statement(statement, module),
             Statement::Module { name: _, from: _ } => {}
             Statement::Return { value } => {
-                if self.current_function == Function::No {
+                if self.current_function == IsFunction::No {
                     eprintln!("you can't use return outside the function");
                 } else {
-                    self.resolve_expression(value, module);
+                    self.resolve_expression(value);
                 }
             }
         }
@@ -70,7 +69,7 @@ impl Resolver {
             }
         }
     }
-    fn resolve_expression(&mut self, expression: &Expression, module: &mut Module) {
+    fn resolve_expression(&mut self, expression: &Expression) {
         match expression {
             Expression::Binary {
                 id: _,
@@ -78,32 +77,32 @@ impl Resolver {
                 operator: _,
                 right,
             } => {
-                self.resolve_expression(left, module);
-                self.resolve_expression(right, module)
+                self.resolve_expression(left);
+                self.resolve_expression(right)
             }
             Expression::Call {
                 id: _,
                 name,
                 arguments,
             } => {
-                self.resolve_expression(name.as_ref(), module);
+                self.resolve_expression(name.as_ref());
                 for argument in arguments {
-                    self.resolve_expression(argument, module)
+                    self.resolve_expression(argument)
                 }
             }
             Expression::Grouping { id: _, expression } => {
-                self.resolve_expression(expression, module);
+                self.resolve_expression(expression);
             }
             Expression::Map { id: _, items } => {
                 for (_, expression) in items {
-                    self.resolve_expression(expression, module)
+                    self.resolve_expression(expression)
                 }
             }
             Expression::Unary {
                 id: _,
                 left,
                 operator: _,
-            } => self.resolve_expression(left, module),
+            } => self.resolve_expression(left),
             Expression::Variable { id: _, name: _ } => {
                 let id = expression.get_id();
                 match expression {
@@ -135,7 +134,7 @@ impl Resolver {
             _ => {}
         }
     }
-    fn resolve_function(&mut self, statement: &Statement, function: Function, module: &mut Module) {
+    fn resolve_function(&mut self, statement: &Statement, function: IsFunction, module: &mut Module) {
         if let Statement::Function {
             name: _,
             parameters,
@@ -167,11 +166,11 @@ impl Resolver {
             else_branch,
         } = statement
         {
-            self.resolve_expression(condition, module);
+            self.resolve_expression(condition);
             self.resolve_internal(body.as_ref(), module);
             for (else_if_predicates, else_if_statement) in else_if_branches {
                 for else_if_predicate in else_if_predicates {
-                    self.resolve_expression(else_if_predicate, module)
+                    self.resolve_expression(else_if_predicate)
                 }
                 self.resolve_internal(else_if_statement.as_ref(), module)
             }

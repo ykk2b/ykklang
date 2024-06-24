@@ -2,23 +2,24 @@ use std::collections::HashMap;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum Token {
+    // characters and operators
     Colon,
     Comma,
     Dot,
     Plus,
     Minus,
-    Asteric,
-    Slash,
+    Multiplication,
+    Division,
     Percent,
     Bang,
     Equal,
-    More,
+    Greater,
     Less,
     And,
     Pipe,
     Hash,
     At,
-    Ask,
+    QuestionMark,
     LeftBrace,
     RightBrace,
     LeftParen,
@@ -26,17 +27,14 @@ pub enum Token {
     LeftBracket,
     RightBracket,
     Semicolon,
-    ColonEqual,
     BangEqual,
     EqualEqual,
-    MoreEqual,
+    GreaterEqual,
     LessEqual,
     Arrow,
-    Anon,
     AndShort,
     Or,
-    // ExactEqual,
-    // ...
+    // statements
     If,
     ElseIf,
     Else,
@@ -45,7 +43,7 @@ pub enum Token {
     Module,
     Public,
     EoF,
-    // ...
+    // value types
     NumberValue,
     StringValue,
     NullValue,
@@ -78,7 +76,7 @@ pub struct Unit {
 
 pub fn keywords() -> HashMap<&'static str, Token> {
     HashMap::from([
-        // ...
+        // statements
         ("if", Token::If),
         ("else if", Token::Else),
         ("else", Token::Else),
@@ -86,8 +84,7 @@ pub fn keywords() -> HashMap<&'static str, Token> {
         ("return", Token::Return),
         ("module", Token::Module),
         ("public", Token::Public),
-        ("anon", Token::Anon),
-        // ...
+        // types
         ("boolean", Token::BooleanValue),
         ("true", Token::TrueValue),
         ("false", Token::FalseValue),
