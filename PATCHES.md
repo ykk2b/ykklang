@@ -1,15 +1,21 @@
 # Patches (beta, alpha)
 
+### v0.0.1-beta.2
+
+- fixed maps
+- added optimizer (removing unused functions)
+- updated frontend tests
+- added `--no-optimize` option
+
 ### v0.0.1-beta.1
 
 - finish and optimize tokenizer tests
 - fix this loop never actually loops [#267](https://github.com/ykk2b/ykklang/security/code-scanning/267)
 - fix parameter is only used in recursion [#270](https://github.com/ykk2b/ykklang/security/code-scanning/270)
-- fix using clone on type Option<&ValueType> which implements the Copy trait [#268,#269]
-- fix this boolean expression can be simplified [#266]
-- fix implementation of inherent method to_string(&self) -> String for type api::types::ValueType [#265]
-- fix writing &Vec instead of &[_] involves a new object where a slice will do [#256]
-
+- fix using clone on type Option<&ValueType> which implements the Copy trait [#268,#269](https://github.com/ykk2b/ykklang/security/code-scanning/269)
+- fix this boolean expression can be simplified [#266](https://github.com/ykk2b/ykklang/security/code-scanning/270)
+- fix implementation of inherent method to_string(&self) -> String for type api::types::ValueType [#265](https://github.com/ykk2b/ykklang/security/code-scanning/265)
+- fix writing &Vec instead of &[_] involves a new object where a slice will do [#256](https://github.com/ykk2b/ykklang/security/code-scanning/256)
 
 ### v0.0.1-alpha.12
 

@@ -5,9 +5,9 @@ use std::{
 };
 
 use crate::api::{
-    Expression,
     tokenlist::{Token, Unit, Value},
     types::{FunctionValueType, Module, ValueType},
+    Expression,
 };
 
 use super::interpreter::Interpreter;
@@ -87,11 +87,9 @@ impl ValueType {
             }
             Self::False => Self::False,
             Self::True => Self::True,
-            // TODO
-            Self::Function(_) => Self::False,
-            Self::DeclaredFunction(_) => Self::False,
             Self::Null => Self::False,
             Self::Void => Self::False,
+            _ => Self::False,
         }
     }
 }
@@ -135,10 +133,16 @@ impl Expression {
     pub fn evaluate(&self, module: Module) -> ValueType {
         match self {
             Expression::Map { id: _, items } => {
-                let mut evaluated_map: Vec<ValueType> = Vec::new();
+                let mut evaluated_map: Vec<(String, ValueType)> = Vec::new();
 
                 for item in items {
-                    evaluated_map.push(ValueType::String(item.0.to_string()));
+                    evaluated_map.push((
+                        item.0
+                            .trim_end_matches('"')
+                            .trim_start_matches('"')
+                            .to_string(),
+                        item.1.clone(),
+                    ));
                 }
                 ValueType::Map(evaluated_map)
             }
@@ -263,17 +267,21 @@ pub fn run_function(
             let param_name = &param_name_token.lexeme;
             let param_type = &param_name_type.lexeme;
             match (param_type.as_str(), value) {
-                // TODO
-                ("number", ValueType::Number(_)) => {}
-                ("boolean", ValueType::Boolean(_)) => {}
-                ("false", ValueType::False) => {}
-                ("true", ValueType::True) => {}
+                ("string", ValueType::String(_))
+                | ("number", ValueType::Number(_))
+                | ("map", ValueType::Map(_))
+                | ("boolean", ValueType::Boolean(_))
+                | ("false", ValueType::False)
+                | ("true", ValueType::True)
+                | ("null", ValueType::Null)
+                | ("void", ValueType::Void) => {
+                    function_module.define(param_name.clone(), value.clone());
+                }
                 _ => {
                     eprintln!("error: invalid value type");
                     exit(1);
                 }
             }
-            function_module.define(param_name.clone(), value.clone());
         } else {
             eprintln!("number of called arguments doesnt match functions parameter count");
             exit(1);

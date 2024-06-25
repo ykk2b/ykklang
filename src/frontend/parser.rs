@@ -1,7 +1,7 @@
-use crate::api::Expression;
 use crate::api::tokenlist::Token::{self, *};
 use crate::api::types::ValueType;
-use crate::api::{Statement, tokenlist::Unit};
+use crate::api::Expression;
+use crate::api::{tokenlist::Unit, Statement};
 use std::process::exit;
 
 pub struct Parser {
@@ -108,9 +108,9 @@ impl Parser {
         } else {
             value_type = self.previous(1);
         }
-        let name = self.consume(Identifier, "expected a variable name");
+        let name = self.consume(Identifier, "expected a function name");
         let mut parameters: Vec<(Unit, Unit)> = vec![];
-        self.consume(LeftParen, "expected '(' after variable name");
+        self.consume(LeftParen, "expected '(' after function name");
         if !self.check(RightParen) {
             loop {
                 let paramater_type = if self.match_types() {
@@ -242,37 +242,42 @@ impl Parser {
                     id: self.get_id(),
                     name: self.previous(1),
                 };
-
                 if self.match_token(LeftBracket) {
                     let mut items = Vec::new();
-                    while self.check(RightBracket) && self.is_at_end() {
-                        let key = self.previous(1).lexeme.clone();
-
+                    while !self.check(RightBracket) && !self.is_at_end() {
+                        let key = self
+                            .consume(StringValue, "expected key")
+                            .lexeme
+                            .trim_matches('"')
+                            .to_string();
                         self.consume(Colon, "expected ':' after key");
-                        let value = self.expression();
+                        let value_expr = self.expression();
 
-                        if items
-                            .iter()
-                            .any(|item: &(String, Box<Expression>)| item.0 == key)
-                        {
+                        let value = match value_expr {
+                            Expression::Value { value, .. } => value,
+                            _ => {
+                                eprintln!("Expected a value expression");
+                                exit(1);
+                            }
+                        };
+
+                        if items.iter().any(|item: &(String, ValueType)| item.0 == key) {
                             eprintln!("key '{:?}' already exists in the map.", key);
                             exit(1);
                         }
 
-                        items.push((key, Box::new(value)));
+                        items.push((key, value));
 
-                        if self.match_token(Comma) {
+                        if !self.match_token(Comma) {
                             break;
                         }
                     }
                     self.consume(RightBracket, "Expected ']' after map elements.");
-
                     expr = Expression::Map {
                         id: self.get_id(),
                         items,
                     };
                 }
-
                 result = expr;
             }
             LeftParen => {
@@ -309,28 +314,32 @@ impl Parser {
     fn parse_map(&mut self) -> Expression {
         let mut items = Vec::new();
         self.advance();
-        while self.check(RightBracket) && self.is_at_end() {
-            let key = self.previous(1).lexeme.clone();
-
+        while !self.check(RightBracket) && !self.is_at_end() {
+            let key_token = self.consume(StringValue, "expected key");
+            let key = key_token.lexeme;
             self.consume(Colon, "expected ':' after key");
-            let value = self.expression();
+            let value_expr = self.expression();
 
-            if items
-                .iter()
-                .any(|item: &(String, Box<Expression>)| item.0 == key)
-            {
+            let value = match value_expr {
+                Expression::Value { value, .. } => value,
+                _ => {
+                    eprintln!("Expected a value expression");
+                    exit(1);
+                }
+            };
+
+            if items.iter().any(|item: &(String, ValueType)| item.0 == key) {
                 eprintln!("key '{:?}' already exists in the map.", key);
                 exit(1);
             }
 
-            items.push((key, Box::new(value)));
+            items.push((key, value));
 
-            if self.match_token(Comma) {
+            if !self.match_token(Comma) {
                 break;
             }
         }
-        self.consume(RightBracket, "Expect ']' after array elements.");
-
+        self.consume(RightBracket, "Expect ']' after map elements.");
         Expression::Map {
             id: self.get_id(),
             items,
@@ -400,6 +409,7 @@ impl Parser {
             FalseValue,
             NullValue,
             VoidValue,
+            MapValue,
         ])
     }
 

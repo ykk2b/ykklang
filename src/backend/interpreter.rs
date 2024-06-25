@@ -1,12 +1,12 @@
 use std::{collections::HashMap, process::exit, rc::Rc};
 
 use crate::api::{
-    Statement,
     tokenlist::Unit,
     types::{
         ClosuresWrapper, DeclaredFunctionValueType, FunctionValueType, Module, ValueType,
         ValueTypeFunction,
     },
+    Statement,
 };
 
 pub struct Interpreter {
