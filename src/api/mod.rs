@@ -7,7 +7,7 @@ pub mod types;
 pub enum Expression {
     Map {
         id: usize,
-        items: Vec<(String, Box<Expression>)>,
+        items: Vec<(String, ValueType)>,
     },
     Variable {
         id: usize,

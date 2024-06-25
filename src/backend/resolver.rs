@@ -1,5 +1,5 @@
+use crate::api::{tokenlist::Unit, types::Module, Expression, Statement};
 use std::{collections::HashMap, process::exit};
-use crate::api::{Expression, Statement, tokenlist::Unit, types::Module};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 enum IsFunction {
@@ -93,11 +93,7 @@ impl Resolver {
             Expression::Grouping { id: _, expression } => {
                 self.resolve_expression(expression);
             }
-            Expression::Map { id: _, items } => {
-                for (_, expression) in items {
-                    self.resolve_expression(expression)
-                }
-            }
+            Expression::Map { id: _, items: _ } => {}
             Expression::Unary {
                 id: _,
                 left,
@@ -134,7 +130,12 @@ impl Resolver {
             _ => {}
         }
     }
-    fn resolve_function(&mut self, statement: &Statement, function: IsFunction, module: &mut Module) {
+    fn resolve_function(
+        &mut self,
+        statement: &Statement,
+        function: IsFunction,
+        module: &mut Module,
+    ) {
         if let Statement::Function {
             name: _,
             parameters,

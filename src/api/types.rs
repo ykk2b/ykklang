@@ -69,7 +69,7 @@ impl fmt::Debug for dyn ValueTypeFunction {
 pub enum ValueType {
     Number(f32),
     String(String),
-    Map(Vec<ValueType>),
+    Map(Vec<(String, ValueType)>),
     Function(FunctionValueType),
     DeclaredFunction(DeclaredFunctionValueType),
     Boolean(bool),

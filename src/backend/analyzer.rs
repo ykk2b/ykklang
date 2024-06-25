@@ -1,2 +1,5 @@
 // TODO: optimizer and analyzer
-// purpose: runs special diagnostics and analyzes code base (optimizes if needed)
+// should filter used / unused builtin and imported functions
+// avoid infinite loops and recursions
+// warn bard practices
+// 

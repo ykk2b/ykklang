@@ -51,6 +51,7 @@ pub enum Token {
     BooleanValue,
     TrueValue,
     FalseValue,
+    MapValue,
     Identifier,
 }
 impl std::fmt::Display for Token {
@@ -92,5 +93,6 @@ pub fn keywords() -> HashMap<&'static str, Token> {
         ("void", Token::VoidValue),
         ("string", Token::StringValue),
         ("number", Token::NumberValue),
+        ("map", Token::MapValue),
     ])
 }

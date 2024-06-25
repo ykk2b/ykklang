@@ -88,7 +88,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html" class="active">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Getting Started</li><li class="chapter-item expanded "><a href="01-getting-started/installation.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li class="chapter-item expanded "><a href="01-getting-started/hello-world.html"><strong aria-hidden="true">2.</strong> Hello World</a></li><li class="chapter-item expanded affix "><li class="part-title">Concepts</li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">3.</strong> Paradigms</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">4.</strong> Data Types</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">4.1.</strong> Number</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">4.2.</strong> String</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">4.3.</strong> Boolean</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">4.4.</strong> Null/Void</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">4.5.</strong> Map</a></li></ol></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">5.</strong> Functions</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">5.1.</strong> Return</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">5.2.</strong> Parameters</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">5.3.</strong> Recursion</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">5.4.</strong> Loops</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">5.5.</strong> HOF</a></li></ol></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">6.</strong> If</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">7.</strong> Comments</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">8.</strong> Expressions</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">9.</strong> Error Handling</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">10.</strong> Modules</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">10.1.</strong> public</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">10.2.</strong> module</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">10.3.</strong> built-in</a></li></ol></li><li class="chapter-item expanded "><li class="part-title">Advanced</li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">11.</strong> Type System</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">12.</strong> Modules</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">13.</strong> Side-Effects</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">14.</strong> Environments</a></li><li class="chapter-item expanded affix "><li class="part-title">API</li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">15.</strong> Keywords</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">16.</strong> Statements</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">17.</strong> Operators</a></li><li class="chapter-item expanded "><a href="#.html"><strong aria-hidden="true">18.</strong> Versioning</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html" class="active">Introduction</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -173,15 +173,94 @@
 
                 <div id="content" class="content">
                     <main>
-                        
+                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
+<p>Long story short, <strong>YKKLang</strong> is minimalistic, purely functional, interpreted programming language written in Rust.</p>
+<h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
+<p>Download the latest stable (or rc) version from <a href="https://github.com/ykk2b/ykklang/releases">releases</a>, and if you are using Linux run:</p>
+<pre><code class="language-sh">sudo mv path/to/ykklang usr/bin
+ykklang --version
+</code></pre>
+<p>And if you are using Windows or MacOS, switch to Linux!</p>
+<h2 id="hello-world"><a class="header" href="#hello-world">Hello World!</a></h2>
+<p>To write simple "Hello, world!" program, create <code>whatever.ykk</code> file and enter:</p>
+<pre><code>print!("Hello, world!");
+</code></pre>
+<p>and then run:</p>
+<pre><code class="language-sh">ykklang --run whatever.ykk
+</code></pre>
+<p>you should see the output:</p>
+<pre><code>String("Hello, world!")
+</code></pre>
+<h2 id="paradigms"><a class="header" href="#paradigms">Paradigms</a></h2>
+<p><a href="https://en.wikipedia.org/wiki/High-level_programming_language">High-level</a>, <a href="https://en.wikipedia.org/wiki/Declarative_programming">declarative</a> and <a href="https://en.wikipedia.org/wiki/Purely_functional_programming">purely functional</a>.</p>
+<h2 id="data-types"><a class="header" href="#data-types">Data Types</a></h2>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">name</th><th style="text-align: left">description</th><th style="text-align: left">example</th></tr></thead><tbody>
+<tr><td style="text-align: center">string</td><td style="text-align: left">just a string</td><td style="text-align: left">"hi"</td></tr>
+<tr><td style="text-align: center">number</td><td style="text-align: left">32 bit floating point number</td><td style="text-align: left">23</td></tr>
+<tr><td style="text-align: center">boolean</td><td style="text-align: left">either true or false</td><td style="text-align: left">true</td></tr>
+<tr><td style="text-align: center">true</td><td style="text-align: left">just true</td><td style="text-align: left">true</td></tr>
+<tr><td style="text-align: center">false</td><td style="text-align: left">just false</td><td style="text-align: left">false</td></tr>
+<tr><td style="text-align: center">map</td><td style="text-align: left">collection of key-value pairs</td><td style="text-align: left">["name": "john", "age": 25]</td></tr>
+<tr><td style="text-align: center">null</td><td style="text-align: left">no value type</td><td style="text-align: left">null</td></tr>
+<tr><td style="text-align: center">void</td><td style="text-align: left">function type with no returns</td><td style="text-align: left">void</td></tr>
+</tbody></table>
+</div>
+<h2 id="functions"><a class="header" href="#functions">Functions</a></h2>
+<pre><code class="language-rs">void printhi(){
+    print!("hi");
+}
+
+number return2plus2(){
+    return 2 + 2;
+}
+
+number samebutshorter() -&gt; 2 + 2;
+
+number add(number a, number b) -&gt; a + b;
+
+void loop10times(number i){
+    print!(i);
+    if i &lt; 10 {
+        loop10times(i + 1);
+    }
+}
+loop10times(0);
+
+void hof(number a, number b) -&gt; a + b;
+void square(number a) -&gt; a * a;
+hof(square(2), square(5));
+</code></pre>
+<h2 id="if-statement"><a class="header" href="#if-statement">If statement</a></h2>
+<pre><code class="language-rs">if true {
+    print!(true);
+}
+
+if false {
+    print!("this wont print");
+} else {
+    print!(true);
+}
+
+if false {
+    print!("this wont print");
+} else if true {
+    print!(true);
+}
+</code></pre>
+<h2 id="comments"><a class="header" href="#comments">Comments</a></h2>
+<p>todo.</p>
+<h2 id="modules"><a class="header" href="#modules">Modules</a></h2>
+<p>todo.</p>
+<h2 id="type-system"><a class="header" href="#type-system">Type System</a></h2>
+<p>todo.</p>
+<h2 id="api"><a class="header" href="#api">API</a></h2>
+<p>todo.</p>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
 
-                            <a rel="next prefetch" href="01-getting-started/installation.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -190,9 +269,6 @@
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
 
-                    <a rel="next prefetch" href="01-getting-started/installation.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
             </nav>
 
         </div>
