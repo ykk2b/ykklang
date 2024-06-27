@@ -1,4 +1,4 @@
 #!/bin/bash
 
-mdbook build -d docs
+cargo test --verbose
 cargo build --release

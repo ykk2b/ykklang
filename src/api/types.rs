@@ -65,7 +65,7 @@ impl fmt::Debug for dyn ValueTypeFunction {
     }
 }
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, PartialEq)]
 pub enum ValueType {
     Number(f32),
     String(String),

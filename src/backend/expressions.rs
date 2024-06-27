@@ -12,6 +12,12 @@ use crate::api::{
 
 use super::interpreter::Interpreter;
 
+impl std::fmt::Debug for ValueType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_string())
+    }
+}
+
 impl ValueType {
     pub fn from_unit(unit: Unit) -> Self {
         match unit.token {
@@ -97,18 +103,28 @@ impl ValueType {
 impl fmt::Display for ValueType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let res = match self {
-            ValueType::Map(_) => "map".to_string(),
+            ValueType::Map(items) => {
+                let mut formatted_items = String::new();
+                for (i, (key, value)) in items.iter().enumerate() {
+                    formatted_items.push_str(&format!("\"{}\": {}, ", key, value));
+                    if i < items.len() - 1 {
+                        formatted_items.pop();
+                        formatted_items.pop();
+                    }
+                }
+                format!("[{}] {}", formatted_items.trim(), "")
+            }
             ValueType::Boolean(bool) => bool.to_string(),
+            ValueType::Function(fun) => format!("{}()", fun.name),
             ValueType::DeclaredFunction(fun) => format!("{}()", fun.name),
             ValueType::False => "false".to_string(),
             ValueType::True => "true".to_string(),
             ValueType::Null => "null".to_string(),
             ValueType::Void => "void".to_string(),
-            ValueType::Number(_) => "number".to_string(),
-            ValueType::String(_) => "string".to_string(),
-            _ => "unknown".to_string(),
+            ValueType::Number(x) => x.to_string(),
+            ValueType::String(x) => format!("\"{}\"", x),
         };
-        write!(f, "{res}")
+        write!(f, "{}", res)
     }
 }
 
@@ -152,6 +168,7 @@ impl Expression {
                 arguments,
             } => {
                 let callable: ValueType = (*name).evaluate(module.clone());
+                println!("{:?}", callable);
                 match callable {
                     ValueType::Function(function) => run_function(function, arguments, module),
                     ValueType::DeclaredFunction(fun) => {
