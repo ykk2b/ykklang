@@ -1,4 +1,7 @@
-use crate::api::{tokenlist::Unit, types::Module, Expression, Statement};
+use crate::{
+    api::{tokenlist::Unit, types::Module, Expression, Statement},
+    log,
+};
 use std::{collections::HashMap, process::exit};
 
 #[derive(Copy, Clone, PartialEq, Debug)]
@@ -50,7 +53,7 @@ impl Resolver {
             Statement::Module { name: _, from: _ } => {}
             Statement::Return { value } => {
                 if self.current_function == IsFunction::No {
-                    eprintln!("you can't use return outside the function");
+                    log("you can't use return outside the function");
                 } else {
                     self.resolve_expression(value);
                 }
@@ -64,7 +67,7 @@ impl Resolver {
                 self.resolve_many(&statements.iter().collect(), module)
             }
             _ => {
-                eprintln!("failed to resolve a block statement");
+                log("failed to resolve a block statement");
                 exit(1)
             }
         }
@@ -107,7 +110,7 @@ impl Resolver {
                             if let Some(false) =
                                 self.scopes[self.scopes.len() - 1].get(&name.lexeme)
                             {
-                                eprintln!("failed to read a local variable");
+                                log("failed to read a local variable");
                                 exit(1);
                             }
                         }
@@ -120,7 +123,7 @@ impl Resolver {
                     } => match name.as_ref() {
                         Expression::Variable { id: _, name } => self.resolve_local(name, id),
                         _ => {
-                            eprintln!("failed to resolve a variable statement");
+                            log("failed to resolve a variable statement");
                             exit(1);
                         }
                     },
@@ -155,7 +158,7 @@ impl Resolver {
             self.end_scope();
             self.current_function = enclosing_function;
         } else {
-            eprintln!("failed to resolve non-function statement");
+            log("failed to resolve non-function statement");
             exit(1);
         }
     }
@@ -179,7 +182,7 @@ impl Resolver {
                 self.resolve_internal(branch, module);
             }
         } else {
-            eprintln!("failed to resolve an if statement");
+            log("failed to resolve an if statement");
             exit(1);
         }
     }
@@ -195,7 +198,7 @@ impl Resolver {
         if self.scopes.is_empty() {
             return;
         } else if self.scopes[size - 1].contains_key(&name.lexeme.clone()) {
-            eprintln!("'{}' is already declared", name.lexeme.clone());
+            log(format!("'{}' is already declared", name.lexeme.clone()).as_str());
             exit(1)
         }
         self.scopes[size - 1].insert(name.lexeme.clone(), false);

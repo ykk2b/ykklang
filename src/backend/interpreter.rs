@@ -1,12 +1,15 @@
 use std::{collections::HashMap, process::exit, rc::Rc};
 
-use crate::api::{
-    tokenlist::Unit,
-    types::{
-        ClosuresWrapper, DeclaredFunctionValueType, FunctionValueType, Module, ValueType,
-        ValueTypeFunction,
+use crate::{
+    api::{
+        tokenlist::Unit,
+        types::{
+            ClosuresWrapper, DeclaredFunctionValueType, FunctionValueType, Module, ValueType,
+            ValueTypeFunction,
+        },
+        Statement,
     },
-    Statement,
+    log,
 };
 
 pub struct Interpreter {
@@ -42,9 +45,9 @@ impl Interpreter {
             Rc::new(ClosuresWrapper {
                 0: Box::new(|args: &[ValueType]| {
                     if args.len() == 1 {
-                        println!("{:?}", args[0]);
+                        log(format!("{:?}", args[0]).as_str())
                     } else {
-                        eprint!("invalid number of arguments for print!");
+                        log("invalid number of arguments for print!");
                         exit(1);
                     }
                     ValueType::Null
@@ -163,7 +166,7 @@ impl Interpreter {
                 is_public: *is_public,
             }
         } else {
-            eprintln!("failed to declare a function");
+            log("failed to declare a function");
             exit(1);
         }
     }

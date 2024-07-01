@@ -1,6 +1,6 @@
 use std::{cell::RefCell, collections::HashMap, process::exit, rc::Rc};
 
-use crate::api::types::{Module, ValueType};
+use crate::{api::types::{Module, ValueType}, log};
 
 
 fn get_values() -> Rc<RefCell<HashMap<String, ValueType>>> {
@@ -53,7 +53,7 @@ impl Module {
             } else {
                 match &self.enclosing {
                     None => {
-                        eprintln!("failed to resolve a variable");
+                        log("failed to resolve a variable");
                         exit(1);
                     }
                     Some(env) => {

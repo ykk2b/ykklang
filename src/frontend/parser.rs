@@ -2,6 +2,7 @@ use crate::api::tokenlist::Token::{self, *};
 use crate::api::types::ValueType;
 use crate::api::Expression;
 use crate::api::{tokenlist::Unit, Statement};
+use crate::log;
 use std::process::exit;
 
 pub struct Parser {
@@ -116,7 +117,9 @@ impl Parser {
                 let paramater_type = if self.match_types() {
                     self.previous(1)
                 } else {
-                    eprintln!("expected parameter type at line {}", name.line_number);
+                    log(
+                        format!("expected parameter type at line {}", name.line_number).as_str(),
+                    );
                     exit(1);
                 };
 
@@ -145,9 +148,12 @@ impl Parser {
         let body = match self.block_statement() {
             Statement::Block { statements } => statements,
             _ => {
-                eprintln!(
-                    "failed to parse a block statement at line {}",
-                    name.line_number
+                log(
+                    format!(
+                        "failed to parse a block statement at line {}",
+                        name.line_number,
+                    )
+                    .as_str(),
                 );
                 exit(1);
             }
@@ -256,13 +262,15 @@ impl Parser {
                         let value = match value_expr {
                             Expression::Value { value, .. } => value,
                             _ => {
-                                eprintln!("Expected a value expression");
+                                log("Expected a value expression");
                                 exit(1);
                             }
                         };
 
                         if items.iter().any(|item: &(String, ValueType)| item.0 == key) {
-                            eprintln!("key '{:?}' already exists in the map.", key);
+                            log(
+                                format!("key '{:?}' already exists in the map.", key).as_str(),
+                            );
                             exit(1);
                         }
 
@@ -301,9 +309,12 @@ impl Parser {
                 return self.parse_map();
             }
             _ => {
-                eprintln!(
-                    "unexpected token ('{}') at line {}",
-                    token.lexeme, token.line_number
+                log(
+                    format!(
+                        "unexpected token ('{}') at line {}",
+                        token.lexeme, token.line_number,
+                    )
+                    .as_str(),
                 );
                 exit(1);
             }
@@ -323,13 +334,13 @@ impl Parser {
             let value = match value_expr {
                 Expression::Value { value, .. } => value,
                 _ => {
-                    eprintln!("Expected a value expression");
+                    log("Expected a value expression");
                     exit(1);
                 }
             };
 
             if items.iter().any(|item: &(String, ValueType)| item.0 == key) {
-                eprintln!("key '{:?}' already exists in the map.", key);
+                log(format!("key '{:?}' already exists in the map.", key).as_str());
                 exit(1);
             }
 
@@ -372,7 +383,7 @@ impl Parser {
             return self.previous(1);
         }
 
-        eprintln!("{}, at line {}", msg, unit.line_number);
+        log(format!("{}, at line {}", msg, unit.line_number).as_str());
         unit.clone()
     }
 

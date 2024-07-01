@@ -4,10 +4,13 @@ use std::{
     process::exit,
 };
 
-use crate::api::{
-    tokenlist::{Token, Unit, Value},
-    types::{FunctionValueType, Module, ValueType},
-    Expression,
+use crate::{
+    api::{
+        tokenlist::{Token, Unit, Value},
+        types::{FunctionValueType, Module, ValueType},
+        Expression,
+    },
+    log,
 };
 
 use super::interpreter::Interpreter;
@@ -25,7 +28,7 @@ impl ValueType {
                 let number = match unit.value {
                     Some(Value::Number(x)) => x,
                     _ => {
-                        eprintln!("failed to unwrap a number");
+                        log("failed to unwrap a number");
                         exit(1)
                     }
                 };
@@ -35,7 +38,7 @@ impl ValueType {
                 let string = match unit.value {
                     Some(Value::String(s)) => s.clone(),
                     _ => {
-                        eprintln!("failed to unwrap a string");
+                        log("failed to unwrap a string");
                         exit(1);
                     }
                 };
@@ -49,7 +52,7 @@ impl ValueType {
                 let bool_value = match unit.value {
                     Some(Value::_Boolean(b)) => b,
                     _ => {
-                        eprintln!("failed to unwrap a boolean");
+                        log("failed to unwrap a boolean");
                         exit(1);
                     }
                 };
@@ -124,7 +127,7 @@ impl fmt::Display for ValueType {
             ValueType::Number(x) => x.to_string(),
             ValueType::String(x) => format!("\"{}\"", x),
         };
-        write!(f, "{}", res)
+        write!(f, "{res}")
     }
 }
 
@@ -168,7 +171,6 @@ impl Expression {
                 arguments,
             } => {
                 let callable: ValueType = (*name).evaluate(module.clone());
-                println!("{:?}", callable);
                 match callable {
                     ValueType::Function(function) => run_function(function, arguments, module),
                     ValueType::DeclaredFunction(fun) => {
@@ -179,7 +181,7 @@ impl Expression {
                         fun.function.call(&evaluated_args)
                     }
                     _ => {
-                        eprintln!("error: non-functional call");
+                        log("error: non-functional call");
                         ValueType::Null
                     }
                 }
@@ -270,7 +272,7 @@ pub fn run_function(
     module: Module,
 ) -> ValueType {
     if arguments.len() != function.parameter_count {
-        eprintln!("invalid parameter count");
+        log("invalid parameter count");
         exit(1)
     }
     let mut argument_values = vec![];
@@ -278,6 +280,7 @@ pub fn run_function(
         argument_values.push(argument.evaluate(module.clone()))
     }
     let function_module = function.parent_module.enclose();
+
     for (i, value) in argument_values.iter().enumerate() {
         if i < function.parameters.len() {
             let (param_name_token, param_name_type) = &function.parameters[i];
@@ -295,12 +298,12 @@ pub fn run_function(
                     function_module.define(param_name.clone(), value.clone());
                 }
                 _ => {
-                    eprintln!("error: invalid value type");
+                    log("error: invalid value type");
                     exit(1);
                 }
             }
         } else {
-            eprintln!("number of called arguments doesnt match functions parameter count");
+            log("number of called arguments doesnt match functions parameter count");
             exit(1);
         }
     }
@@ -312,7 +315,7 @@ pub fn run_function(
         if value.is_some() {
             let returned_value = value.unwrap().clone();
             if function.value_type.lexeme != returned_value.to_string() {
-                eprintln!("invalid function output value type");
+                log("invalid function output value type");
                 exit(1);
             }
             return returned_value;
@@ -320,7 +323,7 @@ pub fn run_function(
     }
 
     if function.value_type.lexeme != "void" {
-        eprintln!("invalid function output value type");
+        log("invalid function output value type");
         exit(1)
     }
     ValueType::Void

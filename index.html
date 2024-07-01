@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body></body>
+  <script type="module">
+    window.log = function (s) {
+      console.log(s);
+    };
+    import init, { interpret } from "./pkg/ykklang.js";
+
+    init().then(() => {
+      interpret(`
+      void square(number a) {
+        print!(a * a);
+      }
+      square(2);
+      `);
+    });
+  </script>
+</html>

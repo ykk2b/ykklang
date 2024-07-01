@@ -1,5 +1,6 @@
 use crate::api::tokenlist::Token::{self, *};
 use crate::api::tokenlist::{keywords, Unit, Value};
+use crate::log;
 use std::collections::HashMap;
 use std::process::exit;
 
@@ -119,7 +120,10 @@ impl Tokenizer {
                 } else if character.is_alphabetic() || character == '_' || self.peek() == '!' {
                     self.parse_identifier();
                 } else {
-                    eprintln!("unexpected character (line {}): {}", self.line, character);
+                    log(
+                        format!("unexpected character (line {}): {}", self.line, character)
+                            .as_str(),
+                    );
                 }
             }
         }
@@ -179,7 +183,7 @@ impl Tokenizer {
         }
 
         if self.is_at_end() {
-            eprintln!("please terminate the string.");
+            log("please terminate the string.");
             exit(1);
         }
 
